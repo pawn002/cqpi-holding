@@ -2,6 +2,129 @@
     "pipes": [],
     "interfaces": [
         {
+            "name": "ColorMetaObj",
+            "id": "interface-ColorMetaObj-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
+            "file": "src/app/services/color-util.service.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "interface",
+            "sourceCode": "import { Injectable } from '@angular/core';\r\nimport Color from 'colorjs.io';\r\nimport { to } from 'colorjs.io/fn';\r\nimport { ColorConstructor } from 'colorjs.io/types/src/color';\r\nimport { scaleLinear, sort } from 'd3';\r\nimport { random, reverse, uniqBy, uniq } from 'lodash';\r\nimport {\r\n  TableColorCell,\r\n  TableData,\r\n} from '../palette-table/palette-table.component';\r\n\r\nexport type ColorPair = [string, string];\r\n\r\nexport type ColorCoordArray = [number, number, number];\r\n\r\nexport class ChromaMatchObject {\r\n  success: boolean = false;\r\n  colors: ColorPair | null = null;\r\n  chroma: number | null = null;\r\n}\r\n\r\nexport interface MinMaxLightObject {\r\n  originalCoords: ColorCoordArray;\r\n  lightMin: number;\r\n  lightMax: number;\r\n}\r\n\r\n// export type ColorVariant = [number, number, number];\r\n\r\nexport interface ColorMetaObj {\r\n  lightness: number | string;\r\n  chroma: number | string;\r\n  hue: number | string;\r\n  saturation: number | string;\r\n}\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorUtilService {\r\n  parseColor(color: string): ColorConstructor | null {\r\n    let parsedColor: ColorConstructor | null = null;\r\n\r\n    try {\r\n      parsedColor = Color.parse(color);\r\n    } catch (error) {\r\n      console.error(error);\r\n    }\r\n    return parsedColor;\r\n  }\r\n\r\n  getRgb255Array(color: string) {\r\n    const colorObj = this.parseColor(color);\r\n\r\n    let array255: [number, number, number] | null = null;\r\n\r\n    if (colorObj) {\r\n      const colorCoordsDecimal = colorObj.coords;\r\n\r\n      array255 = [\r\n        Math.round(colorCoordsDecimal[0] * 255),\r\n        Math.round(colorCoordsDecimal[1] * 255),\r\n        Math.round(colorCoordsDecimal[2] * 255),\r\n      ];\r\n    } else {\r\n      console.error(`unable to parse: ${color}`);\r\n    }\r\n\r\n    return array255;\r\n  }\r\n\r\n  createSrgbColor(color: string, lightness: number): string | null {\r\n    let srgbColor: string | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const originalChroma = oklchColor.coords[1];\r\n      const originalHue = oklchColor.coords[2];\r\n\r\n      const targetColor = new Color('oklch', [\r\n        lightness,\r\n        originalChroma,\r\n        originalHue,\r\n      ]);\r\n\r\n      // const inSrgbGamut = targetColor.inGamut('srgb');\r\n\r\n      // if (!inSrgbGamut) {\r\n      //   console.warn(\r\n      //     `OKLCH color in SRGB gamut: ${targetColor.inGamut('srgb')}`\r\n      //   );\r\n      // }\r\n\r\n      const tColorInSrgbGamut = targetColor.toGamut({\r\n        space: 'srgb',\r\n        method: 'oklch.c',\r\n      });\r\n\r\n      const targetColorAsRgbColor = tColorInSrgbGamut.to('srgb');\r\n\r\n      srgbColor = targetColorAsRgbColor.toString({ format: 'hex' });\r\n    }\r\n\r\n    return srgbColor;\r\n  }\r\n\r\n  isInSrgbGamut(oklchColorCoord: ColorCoordArray): Promise<boolean> {\r\n    return new Promise<boolean>((resolve, reject) => {\r\n      try {\r\n        const colorObject = new Color('oklch', oklchColorCoord);\r\n        const variantInGamut = colorObject.inGamut('srgb');\r\n\r\n        resolve(variantInGamut);\r\n      } catch (error) {\r\n        reject(error);\r\n      }\r\n    });\r\n  }\r\n\r\n  createVariants(color: string): Array<ColorCoordArray> | null {\r\n    let variantCollection: Array<ColorCoordArray> | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const lchCooords = oklchColor.coords;\r\n      const colorChroma = lchCooords[1];\r\n      const colorHue = lchCooords[2];\r\n\r\n      // 1) create enough steps of lightness\r\n      const lightnessSteps = 1000;\r\n      const lightMax = 1;\r\n      const lightMin = 0;\r\n      const lightInterval = (lightMax - lightMin) / lightnessSteps;\r\n\r\n      // 2) create all variants of color using constant chroma and hue.\r\n      variantCollection = [];\r\n\r\n      // 2a) this actually creates `lightnessSteps + 1` variants as initial variant has to start at zero.\r\n      for (let i = 0; i <= lightnessSteps; i++) {\r\n        const variantTargetLight = i * lightInterval;\r\n        const variant: ColorCoordArray = [\r\n          variantTargetLight,\r\n          colorChroma,\r\n          colorHue,\r\n        ];\r\n\r\n        variantCollection.push(variant);\r\n      }\r\n    } else {\r\n      console.error(`unable to parse color`);\r\n    }\r\n\r\n    return variantCollection;\r\n  }\r\n\r\n  filterOutOfGamutVariants(\r\n    variants: Array<ColorCoordArray> | null\r\n  ): Promise<Array<ColorCoordArray>> {\r\n    return new Promise(async (resolve, reject) => {\r\n      if (!variants) {\r\n        reject(`no variants`);\r\n      } else {\r\n        let filteringComplete: boolean = false;\r\n\r\n        const filtered = [];\r\n\r\n        for (let i = 0; i < variants.length; i++) {\r\n          const curVariant = variants[i];\r\n\r\n          if (await this.isInSrgbGamut(curVariant)) {\r\n            filtered.push(curVariant);\r\n          }\r\n\r\n          if (i === variants.length - 1) filteringComplete = true;\r\n        }\r\n\r\n        if (filteringComplete) {\r\n          resolve(filtered);\r\n        } else {\r\n          reject(`error`);\r\n        }\r\n      }\r\n    });\r\n  }\r\n\r\n  async getMinMaxLight(color: string): Promise<MinMaxLightObject | null> {\r\n    let returnedObject: MinMaxLightObject | null = null;\r\n\r\n    const initVariantCollection = this.createVariants(color);\r\n\r\n    const variantCollection = await this.filterOutOfGamutVariants(\r\n      initVariantCollection\r\n    );\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor && variantCollection.length) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      const lchCooords = oklchColor.coords;\r\n\r\n      const oklchLightCoordIndex = 0;\r\n      const firstArrayItemIndex = 0;\r\n      const lastArrayItemIndex = variantCollection.length - 1;\r\n\r\n      const minLight =\r\n        variantCollection[firstArrayItemIndex][oklchLightCoordIndex];\r\n      const maxLight =\r\n        variantCollection[lastArrayItemIndex][oklchLightCoordIndex];\r\n\r\n      returnedObject = {\r\n        originalCoords: lchCooords,\r\n        lightMin: minLight,\r\n        lightMax: maxLight,\r\n      };\r\n    } else {\r\n      if (!parsedColor) {\r\n        console.error(`unable to parse color`);\r\n      } else {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n        const lchCooords = oklchColor.coords;\r\n        returnedObject = {\r\n          originalCoords: lchCooords,\r\n          lightMin: lchCooords[0],\r\n          lightMax: lchCooords[0],\r\n        };\r\n      }\r\n    }\r\n\r\n    return returnedObject;\r\n  }\r\n\r\n  async getRandomColorPair(): Promise<ColorPair> {\r\n    let pair: ColorPair = ['black', 'white'];\r\n\r\n    // ref: oklch.com\r\n    // const targetChroma = 0.11;\r\n    const targetChroma = random(0.11, 0.34, true);\r\n\r\n    const colorOneLight = random(0.25, 0.26, true);\r\n    const colorOneHue = random(0, 360, true);\r\n    const colorTwoLight = random(0.94, 0.95, true);\r\n    const colorTwoHue = random(0, 360, true);\r\n\r\n    const colorOne = new Color('oklch', [\r\n      colorOneLight,\r\n      targetChroma,\r\n      colorOneHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const colorTwo = new Color('oklch', [\r\n      colorTwoLight,\r\n      targetChroma,\r\n      colorTwoHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const initPair: ColorPair = [colorOne, colorTwo];\r\n\r\n    const chromaMatchedPair = await this.matchChromas(initPair);\r\n\r\n    pair = chromaMatchedPair.colors ? chromaMatchedPair.colors : pair;\r\n\r\n    return pair;\r\n  }\r\n\r\n  // This function only adjust the first color of the pair.\r\n  async adjustColorPairForPresentation(pair: ColorPair): Promise<ColorPair> {\r\n    let returnedPair: ColorPair = ['black', 'white'];\r\n\r\n    const colorOne = pair[0];\r\n    const colortwo = pair[1];\r\n\r\n    const parsedColorOne = this.parseColor(colorOne);\r\n\r\n    const colorOneMinMaxLightObj = await this.getMinMaxLight(colorOne);\r\n\r\n    if (parsedColorOne && colorOneMinMaxLightObj) {\r\n      const colorOneTargetLightness =\r\n        colorOneMinMaxLightObj.lightMin +\r\n        (colorOneMinMaxLightObj.lightMax - colorOneMinMaxLightObj.lightMin) / 2;\r\n\r\n      const oklchColorOne = new Color('srgb', parsedColorOne.coords).to(\r\n        'oklch'\r\n      );\r\n\r\n      const adjColorOne = new Color('oklch', [\r\n        colorOneTargetLightness,\r\n        oklchColorOne.coords[1],\r\n        oklchColorOne.coords[2],\r\n      ])\r\n        .to('srgb')\r\n        .toString({ format: 'hex' });\r\n\r\n      returnedPair = [adjColorOne, colortwo];\r\n    } else {\r\n      console.warn('trouble adjusting colors');\r\n    }\r\n\r\n    return returnedPair;\r\n  }\r\n\r\n  async matchChromas(colorpair: ColorPair): Promise<ChromaMatchObject> {\r\n    let pair: ChromaMatchObject = {\r\n      success: false,\r\n      colors: null,\r\n      chroma: null,\r\n    };\r\n\r\n    const colorOneParsed = this.parseColor(colorpair[0]);\r\n    const colorTwoParsed = this.parseColor(colorpair[1]);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneOklch = new Color('srgb', colorOneParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorOneChroma = colorOneOklch.coords[1];\r\n\r\n      const colorTwoOklch = new Color('srgb', colorTwoParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorTwoChroma = colorTwoOklch.coords[1];\r\n\r\n      const colorOneCandCoords: ColorCoordArray = [\r\n        colorOneOklch.coords[0],\r\n        colorTwoChroma,\r\n        colorOneOklch.coords[2],\r\n      ];\r\n      const colorTwoCandCoords: ColorCoordArray = [\r\n        colorTwoOklch.coords[0],\r\n        colorOneChroma,\r\n        colorTwoOklch.coords[2],\r\n      ];\r\n\r\n      const colorOneCandInGamut = await this.isInSrgbGamut(colorOneCandCoords);\r\n      const colorTwoCandInGamut = await this.isInSrgbGamut(colorTwoCandCoords);\r\n\r\n      if (colorOneCandInGamut && !colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          new Color('oklch', colorOneCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n          colorpair[1],\r\n        ];\r\n\r\n        pair.chroma = colorOneCandCoords[1];\r\n      }\r\n\r\n      if (!colorOneCandInGamut && colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          colorpair[0],\r\n          new Color('oklch', colorTwoCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n        ];\r\n\r\n        pair.chroma = colorTwoCandCoords[1];\r\n      }\r\n\r\n      if (colorOneCandInGamut && colorTwoCandInGamut) {\r\n        if (colorOneCandCoords[1] > colorTwoCandCoords[1]) {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            new Color('oklch', colorOneCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n            colorpair[1],\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        } else {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            colorpair[0],\r\n            new Color('oklch', colorTwoCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        }\r\n      }\r\n    } else {\r\n      console.error(\"color parsing didn't work out. \");\r\n    }\r\n\r\n    return pair;\r\n  }\r\n\r\n  calcDeltaE(colorOne: string, colorTwo: string): number | null {\r\n    let delta: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawDelta = colorOneObj.deltaE2000(colorTwoObj);\r\n\r\n      // const fixedDelta = rawDelta.toFixed(2);\r\n\r\n      // delta = parseFloat(fixedDelta);\r\n      delta = Math.round(rawDelta);\r\n    }\r\n\r\n    return delta;\r\n  }\r\n\r\n  calcWcag2(colorOne: string, colorTwo: string): number | null {\r\n    let wcag21: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawWcag21 = colorOneObj.contrast(colorTwoObj, 'WCAG21');\r\n\r\n      const fixedDelta = rawWcag21.toFixed(1);\r\n\r\n      wcag21 = parseFloat(fixedDelta);\r\n    }\r\n\r\n    return wcag21;\r\n  }\r\n\r\n  getColorMeta(color: string): ColorMetaObj | null {\r\n    let meta: ColorMetaObj | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const lchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      meta = {\r\n        lightness: lchColor.coords[0].toFixed(2),\r\n        chroma: lchColor.coords[1].toFixed(2),\r\n        hue: lchColor.coords[2].toFixed(2),\r\n        saturation: ((lchColor.coords[1] / lchColor.coords[0]) * 100).toFixed(\r\n          2\r\n        ),\r\n      };\r\n    }\r\n\r\n    return meta;\r\n  }\r\n\r\n  getMinObjectDimension(apca: number): number {\r\n    let dimension: number = NaN;\r\n\r\n    const absApca = Math.abs(apca);\r\n\r\n    const pixels = [1, 1.5, 2, 3, 4, 6, 8, 10, 15];\r\n    const apcaScores = [90, 75, 60, 50, 45, 30, 25, 20, 15];\r\n    const minLookup = scaleLinear(pixels).domain(apcaScores);\r\n\r\n    const initSize = minLookup(absApca).toFixed(2);\r\n\r\n    dimension = parseFloat(initSize);\r\n\r\n    if (dimension > 15) {\r\n      dimension = 15;\r\n    }\r\n\r\n    if (absApca >= 100) {\r\n      dimension = 0.25;\r\n    }\r\n\r\n    if (absApca < 15) {\r\n      dimension = NaN;\r\n    }\r\n\r\n    return dimension;\r\n  }\r\n\r\n  generateAllOklchVariants(\r\n    color: string,\r\n    lightSteps: number,\r\n    chromaSteps: number\r\n  ): Promise<TableData> {\r\n    return new Promise((resolve, reject) => {\r\n      const parsedColor = this.parseColor(color);\r\n\r\n      const variantsCollection = [];\r\n\r\n      let sortedVariantsCollection = [];\r\n\r\n      if (parsedColor) {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n        const lchCooords = oklchColor.coords;\r\n        const colorLight = lchCooords[0];\r\n        const colorChroma = lchCooords[1];\r\n        const colorHue = lchCooords[2];\r\n\r\n        const lightMax = 1;\r\n        const lightMin = 0;\r\n        const lightInterval = (lightMax - lightMin) / lightSteps;\r\n\r\n        // calculate light levels\r\n        const rawLightLevels = [];\r\n\r\n        let lLevel = colorLight;\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel + lightInterval;\r\n        } while (lLevel <= lightMax);\r\n\r\n        lLevel = colorLight;\r\n\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel - lightInterval;\r\n        } while (lLevel >= lightMin);\r\n\r\n        const sortedLightLevels = sort(uniq(rawLightLevels));\r\n\r\n        const chromaMax = 0.33;\r\n        const chromaMin = 0;\r\n        const chromaInterval = (chromaMax - chromaMin) / chromaSteps;\r\n\r\n        // calculate chroma levels\r\n        const rawChromaLevels = [];\r\n\r\n        let cLevel = colorChroma;\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel + chromaInterval;\r\n        } while (cLevel <= chromaMax);\r\n\r\n        cLevel = colorChroma;\r\n\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel - chromaInterval;\r\n        } while (cLevel >= chromaMin);\r\n\r\n        const sortedChromaLevels = sort(uniq(rawChromaLevels));\r\n\r\n        // generate all rows\r\n        for (let i = 0; i < sortedLightLevels.length; i++) {\r\n          const variantRow: Array<TableColorCell> = [];\r\n\r\n          for (let j = 0; j < sortedChromaLevels.length; j++) {\r\n            const targetLightness = sortedLightLevels[i];\r\n\r\n            const targetChroma = sortedChromaLevels[j];\r\n\r\n            const variantColor = new Color('oklch', [\r\n              targetLightness,\r\n              targetChroma,\r\n              colorHue,\r\n            ]);\r\n\r\n            const variantColorinGamut = variantColor.inGamut('srgb');\r\n\r\n            const colorVal = variantColorinGamut\r\n              ? variantColor.to('srgb').toString({ format: 'hex' })\r\n              : null;\r\n\r\n            const deltaE = colorVal ? this.calcDeltaE(colorVal, color) : null;\r\n\r\n            const dLight = colorVal\r\n              ? Math.round(((targetLightness - colorLight) / colorLight) * 100)\r\n              : null;\r\n\r\n            const dChroma = colorVal\r\n              ? Math.round(((targetChroma - colorChroma) / colorChroma) * 100)\r\n              : null;\r\n\r\n            const variantObj: TableColorCell = {\r\n              color: colorVal,\r\n              lightness: targetLightness,\r\n              chroma: targetChroma,\r\n              hue: colorHue,\r\n              deltaE: deltaE,\r\n              deltaChroma: dChroma,\r\n              deltaLightness: dLight,\r\n              // wacg2Comp: NaN,\r\n              // pContrast: NaN,\r\n            };\r\n\r\n            variantRow.push(variantObj);\r\n          }\r\n\r\n          variantsCollection.push(variantRow);\r\n        }\r\n      } else {\r\n        console.error(`could not parse color`);\r\n\r\n        reject(`could not parse color`);\r\n      }\r\n\r\n      // order color rows from light to dark\r\n      sortedVariantsCollection = reverse(variantsCollection);\r\n\r\n      resolve(sortedVariantsCollection);\r\n    });\r\n  }\r\n\r\n  constructor() {}\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "chroma",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | string",
+                    "optional": false,
+                    "description": "",
+                    "line": 32
+                },
+                {
+                    "name": "hue",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | string",
+                    "optional": false,
+                    "description": "",
+                    "line": 33
+                },
+                {
+                    "name": "lightness",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | string",
+                    "optional": false,
+                    "description": "",
+                    "line": 31
+                },
+                {
+                    "name": "saturation",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | string",
+                    "optional": false,
+                    "description": "",
+                    "line": 34
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 171,
+            "methods": [],
+            "extends": []
+        },
+        {
+            "name": "MinMaxLightObject",
+            "id": "interface-MinMaxLightObject-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
+            "file": "src/app/services/color-util.service.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "interface",
+            "sourceCode": "import { Injectable } from '@angular/core';\r\nimport Color from 'colorjs.io';\r\nimport { to } from 'colorjs.io/fn';\r\nimport { ColorConstructor } from 'colorjs.io/types/src/color';\r\nimport { scaleLinear, sort } from 'd3';\r\nimport { random, reverse, uniqBy, uniq } from 'lodash';\r\nimport {\r\n  TableColorCell,\r\n  TableData,\r\n} from '../palette-table/palette-table.component';\r\n\r\nexport type ColorPair = [string, string];\r\n\r\nexport type ColorCoordArray = [number, number, number];\r\n\r\nexport class ChromaMatchObject {\r\n  success: boolean = false;\r\n  colors: ColorPair | null = null;\r\n  chroma: number | null = null;\r\n}\r\n\r\nexport interface MinMaxLightObject {\r\n  originalCoords: ColorCoordArray;\r\n  lightMin: number;\r\n  lightMax: number;\r\n}\r\n\r\n// export type ColorVariant = [number, number, number];\r\n\r\nexport interface ColorMetaObj {\r\n  lightness: number | string;\r\n  chroma: number | string;\r\n  hue: number | string;\r\n  saturation: number | string;\r\n}\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorUtilService {\r\n  parseColor(color: string): ColorConstructor | null {\r\n    let parsedColor: ColorConstructor | null = null;\r\n\r\n    try {\r\n      parsedColor = Color.parse(color);\r\n    } catch (error) {\r\n      console.error(error);\r\n    }\r\n    return parsedColor;\r\n  }\r\n\r\n  getRgb255Array(color: string) {\r\n    const colorObj = this.parseColor(color);\r\n\r\n    let array255: [number, number, number] | null = null;\r\n\r\n    if (colorObj) {\r\n      const colorCoordsDecimal = colorObj.coords;\r\n\r\n      array255 = [\r\n        Math.round(colorCoordsDecimal[0] * 255),\r\n        Math.round(colorCoordsDecimal[1] * 255),\r\n        Math.round(colorCoordsDecimal[2] * 255),\r\n      ];\r\n    } else {\r\n      console.error(`unable to parse: ${color}`);\r\n    }\r\n\r\n    return array255;\r\n  }\r\n\r\n  createSrgbColor(color: string, lightness: number): string | null {\r\n    let srgbColor: string | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const originalChroma = oklchColor.coords[1];\r\n      const originalHue = oklchColor.coords[2];\r\n\r\n      const targetColor = new Color('oklch', [\r\n        lightness,\r\n        originalChroma,\r\n        originalHue,\r\n      ]);\r\n\r\n      // const inSrgbGamut = targetColor.inGamut('srgb');\r\n\r\n      // if (!inSrgbGamut) {\r\n      //   console.warn(\r\n      //     `OKLCH color in SRGB gamut: ${targetColor.inGamut('srgb')}`\r\n      //   );\r\n      // }\r\n\r\n      const tColorInSrgbGamut = targetColor.toGamut({\r\n        space: 'srgb',\r\n        method: 'oklch.c',\r\n      });\r\n\r\n      const targetColorAsRgbColor = tColorInSrgbGamut.to('srgb');\r\n\r\n      srgbColor = targetColorAsRgbColor.toString({ format: 'hex' });\r\n    }\r\n\r\n    return srgbColor;\r\n  }\r\n\r\n  isInSrgbGamut(oklchColorCoord: ColorCoordArray): Promise<boolean> {\r\n    return new Promise<boolean>((resolve, reject) => {\r\n      try {\r\n        const colorObject = new Color('oklch', oklchColorCoord);\r\n        const variantInGamut = colorObject.inGamut('srgb');\r\n\r\n        resolve(variantInGamut);\r\n      } catch (error) {\r\n        reject(error);\r\n      }\r\n    });\r\n  }\r\n\r\n  createVariants(color: string): Array<ColorCoordArray> | null {\r\n    let variantCollection: Array<ColorCoordArray> | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const lchCooords = oklchColor.coords;\r\n      const colorChroma = lchCooords[1];\r\n      const colorHue = lchCooords[2];\r\n\r\n      // 1) create enough steps of lightness\r\n      const lightnessSteps = 1000;\r\n      const lightMax = 1;\r\n      const lightMin = 0;\r\n      const lightInterval = (lightMax - lightMin) / lightnessSteps;\r\n\r\n      // 2) create all variants of color using constant chroma and hue.\r\n      variantCollection = [];\r\n\r\n      // 2a) this actually creates `lightnessSteps + 1` variants as initial variant has to start at zero.\r\n      for (let i = 0; i <= lightnessSteps; i++) {\r\n        const variantTargetLight = i * lightInterval;\r\n        const variant: ColorCoordArray = [\r\n          variantTargetLight,\r\n          colorChroma,\r\n          colorHue,\r\n        ];\r\n\r\n        variantCollection.push(variant);\r\n      }\r\n    } else {\r\n      console.error(`unable to parse color`);\r\n    }\r\n\r\n    return variantCollection;\r\n  }\r\n\r\n  filterOutOfGamutVariants(\r\n    variants: Array<ColorCoordArray> | null\r\n  ): Promise<Array<ColorCoordArray>> {\r\n    return new Promise(async (resolve, reject) => {\r\n      if (!variants) {\r\n        reject(`no variants`);\r\n      } else {\r\n        let filteringComplete: boolean = false;\r\n\r\n        const filtered = [];\r\n\r\n        for (let i = 0; i < variants.length; i++) {\r\n          const curVariant = variants[i];\r\n\r\n          if (await this.isInSrgbGamut(curVariant)) {\r\n            filtered.push(curVariant);\r\n          }\r\n\r\n          if (i === variants.length - 1) filteringComplete = true;\r\n        }\r\n\r\n        if (filteringComplete) {\r\n          resolve(filtered);\r\n        } else {\r\n          reject(`error`);\r\n        }\r\n      }\r\n    });\r\n  }\r\n\r\n  async getMinMaxLight(color: string): Promise<MinMaxLightObject | null> {\r\n    let returnedObject: MinMaxLightObject | null = null;\r\n\r\n    const initVariantCollection = this.createVariants(color);\r\n\r\n    const variantCollection = await this.filterOutOfGamutVariants(\r\n      initVariantCollection\r\n    );\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor && variantCollection.length) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      const lchCooords = oklchColor.coords;\r\n\r\n      const oklchLightCoordIndex = 0;\r\n      const firstArrayItemIndex = 0;\r\n      const lastArrayItemIndex = variantCollection.length - 1;\r\n\r\n      const minLight =\r\n        variantCollection[firstArrayItemIndex][oklchLightCoordIndex];\r\n      const maxLight =\r\n        variantCollection[lastArrayItemIndex][oklchLightCoordIndex];\r\n\r\n      returnedObject = {\r\n        originalCoords: lchCooords,\r\n        lightMin: minLight,\r\n        lightMax: maxLight,\r\n      };\r\n    } else {\r\n      if (!parsedColor) {\r\n        console.error(`unable to parse color`);\r\n      } else {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n        const lchCooords = oklchColor.coords;\r\n        returnedObject = {\r\n          originalCoords: lchCooords,\r\n          lightMin: lchCooords[0],\r\n          lightMax: lchCooords[0],\r\n        };\r\n      }\r\n    }\r\n\r\n    return returnedObject;\r\n  }\r\n\r\n  async getRandomColorPair(): Promise<ColorPair> {\r\n    let pair: ColorPair = ['black', 'white'];\r\n\r\n    // ref: oklch.com\r\n    // const targetChroma = 0.11;\r\n    const targetChroma = random(0.11, 0.34, true);\r\n\r\n    const colorOneLight = random(0.25, 0.26, true);\r\n    const colorOneHue = random(0, 360, true);\r\n    const colorTwoLight = random(0.94, 0.95, true);\r\n    const colorTwoHue = random(0, 360, true);\r\n\r\n    const colorOne = new Color('oklch', [\r\n      colorOneLight,\r\n      targetChroma,\r\n      colorOneHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const colorTwo = new Color('oklch', [\r\n      colorTwoLight,\r\n      targetChroma,\r\n      colorTwoHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const initPair: ColorPair = [colorOne, colorTwo];\r\n\r\n    const chromaMatchedPair = await this.matchChromas(initPair);\r\n\r\n    pair = chromaMatchedPair.colors ? chromaMatchedPair.colors : pair;\r\n\r\n    return pair;\r\n  }\r\n\r\n  // This function only adjust the first color of the pair.\r\n  async adjustColorPairForPresentation(pair: ColorPair): Promise<ColorPair> {\r\n    let returnedPair: ColorPair = ['black', 'white'];\r\n\r\n    const colorOne = pair[0];\r\n    const colortwo = pair[1];\r\n\r\n    const parsedColorOne = this.parseColor(colorOne);\r\n\r\n    const colorOneMinMaxLightObj = await this.getMinMaxLight(colorOne);\r\n\r\n    if (parsedColorOne && colorOneMinMaxLightObj) {\r\n      const colorOneTargetLightness =\r\n        colorOneMinMaxLightObj.lightMin +\r\n        (colorOneMinMaxLightObj.lightMax - colorOneMinMaxLightObj.lightMin) / 2;\r\n\r\n      const oklchColorOne = new Color('srgb', parsedColorOne.coords).to(\r\n        'oklch'\r\n      );\r\n\r\n      const adjColorOne = new Color('oklch', [\r\n        colorOneTargetLightness,\r\n        oklchColorOne.coords[1],\r\n        oklchColorOne.coords[2],\r\n      ])\r\n        .to('srgb')\r\n        .toString({ format: 'hex' });\r\n\r\n      returnedPair = [adjColorOne, colortwo];\r\n    } else {\r\n      console.warn('trouble adjusting colors');\r\n    }\r\n\r\n    return returnedPair;\r\n  }\r\n\r\n  async matchChromas(colorpair: ColorPair): Promise<ChromaMatchObject> {\r\n    let pair: ChromaMatchObject = {\r\n      success: false,\r\n      colors: null,\r\n      chroma: null,\r\n    };\r\n\r\n    const colorOneParsed = this.parseColor(colorpair[0]);\r\n    const colorTwoParsed = this.parseColor(colorpair[1]);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneOklch = new Color('srgb', colorOneParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorOneChroma = colorOneOklch.coords[1];\r\n\r\n      const colorTwoOklch = new Color('srgb', colorTwoParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorTwoChroma = colorTwoOklch.coords[1];\r\n\r\n      const colorOneCandCoords: ColorCoordArray = [\r\n        colorOneOklch.coords[0],\r\n        colorTwoChroma,\r\n        colorOneOklch.coords[2],\r\n      ];\r\n      const colorTwoCandCoords: ColorCoordArray = [\r\n        colorTwoOklch.coords[0],\r\n        colorOneChroma,\r\n        colorTwoOklch.coords[2],\r\n      ];\r\n\r\n      const colorOneCandInGamut = await this.isInSrgbGamut(colorOneCandCoords);\r\n      const colorTwoCandInGamut = await this.isInSrgbGamut(colorTwoCandCoords);\r\n\r\n      if (colorOneCandInGamut && !colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          new Color('oklch', colorOneCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n          colorpair[1],\r\n        ];\r\n\r\n        pair.chroma = colorOneCandCoords[1];\r\n      }\r\n\r\n      if (!colorOneCandInGamut && colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          colorpair[0],\r\n          new Color('oklch', colorTwoCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n        ];\r\n\r\n        pair.chroma = colorTwoCandCoords[1];\r\n      }\r\n\r\n      if (colorOneCandInGamut && colorTwoCandInGamut) {\r\n        if (colorOneCandCoords[1] > colorTwoCandCoords[1]) {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            new Color('oklch', colorOneCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n            colorpair[1],\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        } else {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            colorpair[0],\r\n            new Color('oklch', colorTwoCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        }\r\n      }\r\n    } else {\r\n      console.error(\"color parsing didn't work out. \");\r\n    }\r\n\r\n    return pair;\r\n  }\r\n\r\n  calcDeltaE(colorOne: string, colorTwo: string): number | null {\r\n    let delta: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawDelta = colorOneObj.deltaE2000(colorTwoObj);\r\n\r\n      // const fixedDelta = rawDelta.toFixed(2);\r\n\r\n      // delta = parseFloat(fixedDelta);\r\n      delta = Math.round(rawDelta);\r\n    }\r\n\r\n    return delta;\r\n  }\r\n\r\n  calcWcag2(colorOne: string, colorTwo: string): number | null {\r\n    let wcag21: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawWcag21 = colorOneObj.contrast(colorTwoObj, 'WCAG21');\r\n\r\n      const fixedDelta = rawWcag21.toFixed(1);\r\n\r\n      wcag21 = parseFloat(fixedDelta);\r\n    }\r\n\r\n    return wcag21;\r\n  }\r\n\r\n  getColorMeta(color: string): ColorMetaObj | null {\r\n    let meta: ColorMetaObj | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const lchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      meta = {\r\n        lightness: lchColor.coords[0].toFixed(2),\r\n        chroma: lchColor.coords[1].toFixed(2),\r\n        hue: lchColor.coords[2].toFixed(2),\r\n        saturation: ((lchColor.coords[1] / lchColor.coords[0]) * 100).toFixed(\r\n          2\r\n        ),\r\n      };\r\n    }\r\n\r\n    return meta;\r\n  }\r\n\r\n  getMinObjectDimension(apca: number): number {\r\n    let dimension: number = NaN;\r\n\r\n    const absApca = Math.abs(apca);\r\n\r\n    const pixels = [1, 1.5, 2, 3, 4, 6, 8, 10, 15];\r\n    const apcaScores = [90, 75, 60, 50, 45, 30, 25, 20, 15];\r\n    const minLookup = scaleLinear(pixels).domain(apcaScores);\r\n\r\n    const initSize = minLookup(absApca).toFixed(2);\r\n\r\n    dimension = parseFloat(initSize);\r\n\r\n    if (dimension > 15) {\r\n      dimension = 15;\r\n    }\r\n\r\n    if (absApca >= 100) {\r\n      dimension = 0.25;\r\n    }\r\n\r\n    if (absApca < 15) {\r\n      dimension = NaN;\r\n    }\r\n\r\n    return dimension;\r\n  }\r\n\r\n  generateAllOklchVariants(\r\n    color: string,\r\n    lightSteps: number,\r\n    chromaSteps: number\r\n  ): Promise<TableData> {\r\n    return new Promise((resolve, reject) => {\r\n      const parsedColor = this.parseColor(color);\r\n\r\n      const variantsCollection = [];\r\n\r\n      let sortedVariantsCollection = [];\r\n\r\n      if (parsedColor) {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n        const lchCooords = oklchColor.coords;\r\n        const colorLight = lchCooords[0];\r\n        const colorChroma = lchCooords[1];\r\n        const colorHue = lchCooords[2];\r\n\r\n        const lightMax = 1;\r\n        const lightMin = 0;\r\n        const lightInterval = (lightMax - lightMin) / lightSteps;\r\n\r\n        // calculate light levels\r\n        const rawLightLevels = [];\r\n\r\n        let lLevel = colorLight;\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel + lightInterval;\r\n        } while (lLevel <= lightMax);\r\n\r\n        lLevel = colorLight;\r\n\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel - lightInterval;\r\n        } while (lLevel >= lightMin);\r\n\r\n        const sortedLightLevels = sort(uniq(rawLightLevels));\r\n\r\n        const chromaMax = 0.33;\r\n        const chromaMin = 0;\r\n        const chromaInterval = (chromaMax - chromaMin) / chromaSteps;\r\n\r\n        // calculate chroma levels\r\n        const rawChromaLevels = [];\r\n\r\n        let cLevel = colorChroma;\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel + chromaInterval;\r\n        } while (cLevel <= chromaMax);\r\n\r\n        cLevel = colorChroma;\r\n\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel - chromaInterval;\r\n        } while (cLevel >= chromaMin);\r\n\r\n        const sortedChromaLevels = sort(uniq(rawChromaLevels));\r\n\r\n        // generate all rows\r\n        for (let i = 0; i < sortedLightLevels.length; i++) {\r\n          const variantRow: Array<TableColorCell> = [];\r\n\r\n          for (let j = 0; j < sortedChromaLevels.length; j++) {\r\n            const targetLightness = sortedLightLevels[i];\r\n\r\n            const targetChroma = sortedChromaLevels[j];\r\n\r\n            const variantColor = new Color('oklch', [\r\n              targetLightness,\r\n              targetChroma,\r\n              colorHue,\r\n            ]);\r\n\r\n            const variantColorinGamut = variantColor.inGamut('srgb');\r\n\r\n            const colorVal = variantColorinGamut\r\n              ? variantColor.to('srgb').toString({ format: 'hex' })\r\n              : null;\r\n\r\n            const deltaE = colorVal ? this.calcDeltaE(colorVal, color) : null;\r\n\r\n            const dLight = colorVal\r\n              ? Math.round(((targetLightness - colorLight) / colorLight) * 100)\r\n              : null;\r\n\r\n            const dChroma = colorVal\r\n              ? Math.round(((targetChroma - colorChroma) / colorChroma) * 100)\r\n              : null;\r\n\r\n            const variantObj: TableColorCell = {\r\n              color: colorVal,\r\n              lightness: targetLightness,\r\n              chroma: targetChroma,\r\n              hue: colorHue,\r\n              deltaE: deltaE,\r\n              deltaChroma: dChroma,\r\n              deltaLightness: dLight,\r\n              // wacg2Comp: NaN,\r\n              // pContrast: NaN,\r\n            };\r\n\r\n            variantRow.push(variantObj);\r\n          }\r\n\r\n          variantsCollection.push(variantRow);\r\n        }\r\n      } else {\r\n        console.error(`could not parse color`);\r\n\r\n        reject(`could not parse color`);\r\n      }\r\n\r\n      // order color rows from light to dark\r\n      sortedVariantsCollection = reverse(variantsCollection);\r\n\r\n      resolve(sortedVariantsCollection);\r\n    });\r\n  }\r\n\r\n  constructor() {}\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "lightMax",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 25
+                },
+                {
+                    "name": "lightMin",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 24
+                },
+                {
+                    "name": "originalCoords",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ColorCoordArray",
+                    "optional": false,
+                    "description": "",
+                    "line": 23
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 171,
+            "methods": [],
+            "extends": []
+        },
+        {
+            "name": "NumberKeyLookup",
+            "id": "interface-NumberKeyLookup-8766c9abd832330ff17221c3e43e4f777b3c55554086ce9bf7dc7f318c3d832d9fa3b6191da62fb9ccc37f8e2ab2c529eda6683f219957ef7597394d5cfe7a81",
+            "file": "src/app/services/color-metrics.service.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "interface",
+            "sourceCode": "import { Injectable, inject } from '@angular/core';\r\n\r\nimport { calcAPCA, sRGBtoY } from 'apca-w3';\r\n\r\nimport { scaleLinear } from 'd3';\r\n\r\nimport { ColorUtilService } from './color-util.service';\r\nimport { BpcaService } from './bpca.service';\r\n\r\nexport interface NumberKeyLookup {\r\n  [key: number]: number;\r\n}\r\n\r\nexport type ContrastType = 'apca' | 'bpca';\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorMetricsService {\r\n  cus = inject(ColorUtilService);\r\n  bpca = inject(BpcaService);\r\n\r\n  dev: boolean = true;\r\n\r\n  apcaToWcagLookup: NumberKeyLookup = {};\r\n  apcaToWcagLookupAlt: NumberKeyLookup = {};\r\n\r\n  getContrast(\r\n    colorOne: string,\r\n    colorTwo: string,\r\n    contrastType: ContrastType\r\n  ): number | null {\r\n    let score: number | null = null;\r\n\r\n    const contrast = this.calcRawApcaContrast(colorOne, colorTwo);\r\n\r\n    if (contrast || contrast === 0) {\r\n      if (contrastType === 'apca') {\r\n        const roundedContrast = contrast.toFixed(0);\r\n\r\n        score = parseInt(roundedContrast);\r\n      }\r\n\r\n      if (contrastType === 'bpca') {\r\n        const bpcaScore = this.calcRawBpcaContrast(colorOne, colorTwo);\r\n\r\n        score = bpcaScore;\r\n      }\r\n    } else {\r\n      console.error(`Raw APCA contrast was not calculable`);\r\n    }\r\n\r\n    return score;\r\n  }\r\n\r\n  calcRawApcaContrast(colorOne: string, colorTwo: string): number | null {\r\n    let score: number | null = null;\r\n\r\n    score = calcAPCA(colorOne, colorTwo);\r\n\r\n    return score;\r\n  }\r\n\r\n  calcRawBpcaContrast(colorOne: string, colorTwo: string) {\r\n    let wcag: number = NaN;\r\n\r\n    const lc = this.bpca.calcBPCA(colorOne, colorTwo) as number;\r\n    const colorOneArray255 = this.cus.getRgb255Array(colorOne);\r\n    const colorTwoArray255 = this.cus.getRgb255Array(colorTwo);\r\n\r\n    if (colorOneArray255 && colorTwoArray255) {\r\n      const colorOneY = this.bpca.sRGBtoY(colorOneArray255);\r\n      const colorTwoY = this.bpca.sRGBtoY(colorTwoArray255);\r\n\r\n      wcag = parseFloat(this.bpca.bridgeRatio(lc, colorOneY, colorTwoY, ''));\r\n    } else {\r\n      console.warn(`trouble calculating raw BPCA`);\r\n    }\r\n\r\n    return wcag;\r\n  }\r\n}\r\n",
+            "properties": [],
+            "indexSignatures": [
+                {
+                    "id": "index-declaration-8766c9abd832330ff17221c3e43e4f777b3c55554086ce9bf7dc7f318c3d832d9fa3b6191da62fb9ccc37f8e2ab2c529eda6683f219957ef7597394d5cfe7a81",
+                    "args": [
+                        {
+                            "name": "key",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "returnType": "number",
+                    "line": 10,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                }
+            ],
+            "kind": 181,
+            "methods": [],
+            "extends": []
+        },
+        {
             "name": "User",
             "id": "interface-User-d4821beac0e4a852e513391b7470981c4353fdd95a18628bb68136c8695b489ee15b926e2e5031bc26cf30e1508e0a362c3ee13a06734702b4d15af140e485d5",
             "file": "src/stories/user.ts",
@@ -26,10 +149,1221 @@
             "extends": []
         }
     ],
-    "injectables": [],
+    "injectables": [
+        {
+            "name": "BpcaService",
+            "id": "injectable-BpcaService-8d1f7b2a3cf7b6a2c750f0d1119a7e34ac5ba51fe2e343b923b1b32cea17e789357d52ac17f31a181aafca890dd94493d674f3ba4818f7ce9b7d82e49a3f2d8a",
+            "file": "src/app/services/bpca.service.ts",
+            "properties": [
+                {
+                    "name": "cus",
+                    "defaultValue": "inject(ColorUtilService)",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 8
+                }
+            ],
+            "methods": [
+                {
+                    "name": "alphaBlend",
+                    "args": [
+                        {
+                            "name": "rgbaFG",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0, 1.0]"
+                        },
+                        {
+                            "name": "rgbBG",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0]"
+                        },
+                        {
+                            "name": "isInt",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "true"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "{}",
+                    "typeParameters": [],
+                    "line": 211,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "rgbaFG",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0, 1.0]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "rgbBG",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "isInt",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "true",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "BPCAcontrast",
+                    "args": [
+                        {
+                            "name": "txtY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "bgY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "places",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "-1"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "any",
+                    "typeParameters": [],
+                    "line": 70,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "txtY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "bgY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "places",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "-1",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "bridgeRatio",
+                    "args": [
+                        {
+                            "name": "contrastLc",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "0"
+                        },
+                        {
+                            "name": "txtY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "bgY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "ratioStr",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "' to 1'"
+                        },
+                        {
+                            "name": "places",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "1"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 13,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "contrastLc",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "0",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "txtY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "bgY",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "ratioStr",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "' to 1'",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "places",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "1",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "calcBPCA",
+                    "args": [
+                        {
+                            "name": "textColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "bgColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "places",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "-1"
+                        },
+                        {
+                            "name": "isInt",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "true"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | number",
+                    "typeParameters": [],
+                    "line": 228,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "textColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "bgColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "places",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "-1",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "isInt",
+                            "type": "",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "true",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "sRGBtoY",
+                    "args": [
+                        {
+                            "name": "rgba",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0]"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number",
+                    "typeParameters": [],
+                    "line": 182,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "rgba",
+                            "type": "[]",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "defaultValue": "[0, 0, 0]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "description": "",
+            "rawdescription": "\n",
+            "sourceCode": "import { Injectable, inject } from '@angular/core';\r\nimport { ColorUtilService } from './color-util.service';\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class BpcaService {\r\n  cus = inject(ColorUtilService);\r\n\r\n  // Following Code is copied with some modification from [Bridge-PCA algo](https://github.com/Myndex/bridge-pca/blob/master/src/bridge-pca.js)\r\n  // Attempts to use bpca module as-is has failed because of some issue with colorparsely dependency\r\n\r\n  bridgeRatio(\r\n    contrastLc = 0,\r\n    txtY: number,\r\n    bgY: number,\r\n    ratioStr = ' to 1',\r\n    places = 1\r\n  ) {\r\n    // Takes the output of APCA (either a string or number)\r\n    // and makes it a WCAG2 ratio, returning a string '4.5 to 1'\r\n    // Jan 16 2022 constants\r\n\r\n    let maxY = Math.max(txtY, bgY);\r\n\r\n    const offsetA = 0.2693;\r\n    const preScale = -0.0561;\r\n    const powerShift = 4.537;\r\n\r\n    const mainFactor = 1.113946;\r\n\r\n    const loThresh = 0.3;\r\n    const loExp = 0.48;\r\n    const preEmph = 0.42;\r\n    const postDe = 0.6594;\r\n\r\n    const hiTrim = 0.0785;\r\n    const loTrim = 0.0815;\r\n    const trimThresh = 0.506; // #c0c0c0\r\n\r\n    let addTrim = loTrim + hiTrim;\r\n\r\n    if (maxY > trimThresh) {\r\n      let adjFact = (1.0 - maxY) / (1.0 - trimThresh);\r\n      addTrim = loTrim * adjFact + hiTrim;\r\n    }\r\n\r\n    contrastLc = Math.max(0, Math.abs(contrastLc * 0.01));\r\n    // contrastLc = Math.max(0, Math.abs(parseFloat(contrastLc) * 0.01));\r\n\r\n    // convert Lc into a WCAG ratio\r\n    let wcagContrast =\r\n      (Math.pow(contrastLc + preScale, powerShift) + offsetA) *\r\n        mainFactor *\r\n        contrastLc +\r\n      addTrim;\r\n\r\n    // adjust WCAG ratios that are under  3 : 1, clean up near 0.\r\n    wcagContrast =\r\n      wcagContrast > loThresh\r\n        ? 10.0 * wcagContrast\r\n        : contrastLc < 0.06\r\n        ? 0\r\n        : 10.0 * wcagContrast -\r\n          (Math.pow(loThresh - wcagContrast + preEmph, loExp) - postDe);\r\n\r\n    return wcagContrast.toFixed(places) + ratioStr; // + '<br>trim:' + addTrim;\r\n  }\r\n\r\n  BPCAcontrast(txtY: number, bgY: number, places = -1) {\r\n    // send linear Y (luminance) for text and background.\r\n    // txtY and bgY must be between 0.0-1.0\r\n    // IMPORTANT: Do not swap, polarity is important.\r\n\r\n    const icp = [0.0, 1.1]; // input range clamp / input error check\r\n\r\n    if (\r\n      isNaN(txtY) ||\r\n      isNaN(bgY) ||\r\n      Math.min(txtY, bgY) < icp[0] ||\r\n      Math.max(txtY, bgY) > icp[1]\r\n    ) {\r\n      return 0; // return zero on error\r\n      // return 'error'; // optional string return for error\r\n    }\r\n\r\n    //////////   BPCA 0.1.6 G - 4g Constants   ///////////////////////\r\n\r\n    const normBG = 0.56,\r\n      normTXT = 0.57,\r\n      revTXT = 0.62,\r\n      revBG = 0.65; // G-4g constants for use with 2.4 exponent\r\n\r\n    const blkThrs = 0.022,\r\n      blkClmp = 1.414,\r\n      scaleBoW = 1.14,\r\n      scaleWoB = 1.14,\r\n      loBoWoffset = 0.027,\r\n      loWoBoffset = 0.027,\r\n      bridgeWoBfact = 0.1414,\r\n      bridgeWoBpivot = 0.84,\r\n      loClip = 0.1,\r\n      deltaYmin = 0.0005;\r\n\r\n    //////////   SAPC LOCAL VARS   /////////////////////////////////////////\r\n\r\n    let SAPC = 0.0; // For raw SAPC values\r\n    let outputContrast = 0.0; // For weighted final values\r\n    let polCat = 'BoW'; // Polarity Indicator. N normal R reverse\r\n\r\n    // TUTORIAL\r\n\r\n    // Use Y for text and BG, and soft clamp black,\r\n    // return 0 for very close luminances, determine\r\n    // polarity, and calculate SAPC raw contrast\r\n    // Then scale for easy to remember levels.\r\n\r\n    // Note that reverse contrast (white text on black)\r\n    // intentionally returns a negative number\r\n    // Proper polarity is important!\r\n\r\n    //////////   BLACK SOFT CLAMP   ////////////////////////////////////////\r\n\r\n    // Soft clamps Y for either color if it is near black.\r\n    txtY = txtY > blkThrs ? txtY : txtY + Math.pow(blkThrs - txtY, blkClmp);\r\n    bgY = bgY > blkThrs ? bgY : bgY + Math.pow(blkThrs - bgY, blkClmp);\r\n\r\n    ///// Return 0 Early for extremely low ∆Y\r\n    if (Math.abs(bgY - txtY) < deltaYmin) {\r\n      return 0.0;\r\n    }\r\n\r\n    //////////   Bridge-PCA/SAPC CONTRAST - LOW CLIP (W3 LICENSE)  ///////////////\r\n\r\n    if (bgY > txtY) {\r\n      // For normal polarity, black text on white (BoW)\r\n\r\n      // Calculate the SAPC contrast value and scale\r\n\r\n      SAPC = (Math.pow(bgY, normBG) - Math.pow(txtY, normTXT)) * scaleBoW;\r\n\r\n      // Low Clip to prevent polarity reversal\r\n      outputContrast = SAPC < loClip ? 0.0 : SAPC - loBoWoffset;\r\n    } else {\r\n      // For reverse polarity, light text on dark (WoB)\r\n      // WoB should always return either negative value.\r\n      // OR the output will have R appended as string '23R'\r\n      // OR WoB '23 BoW' toolmaker choice so long as explained\r\n      polCat = 'WoB';\r\n\r\n      SAPC = (Math.pow(bgY, revBG) - Math.pow(txtY, revTXT)) * scaleWoB;\r\n\r\n      // this is a special offset to align with incorrect WCAG_2 math.\r\n      let bridge = Math.max(0, txtY / bridgeWoBpivot - 1.0) * bridgeWoBfact;\r\n\r\n      // console.log(bridge + ' txtY ' + txtY + ' SAPC ' + SAPC);\r\n\r\n      outputContrast = SAPC > -loClip ? 0.0 : SAPC + loWoBoffset + bridge;\r\n    }\r\n\r\n    // return Lc (lightness contrast) as a signed numeric value\r\n    // Round to the nearest whole number is optional.\r\n    // Rounded can be a signed INT as output will be within ± 127\r\n    // places = -1 returns signed float, 0 returns rounded as string\r\n\r\n    if (places < 0) {\r\n      return outputContrast * 100.0;\r\n    } else if (places == 0) {\r\n      return (\r\n        Math.round(Math.abs(outputContrast) * 100.0) +\r\n        '<sub>' +\r\n        polCat +\r\n        '</sub>'\r\n      );\r\n    } else if (Number.isInteger(places)) {\r\n      return (outputContrast * 100.0).toFixed(places);\r\n    } else {\r\n      throw 'Err-3';\r\n    }\r\n  } // End BPCAcontrast()\r\n\r\n  sRGBtoY(rgba = [0, 0, 0]) {\r\n    // send sRGB 8bpc (0xFFFFFF) or string\r\n\r\n    /////   Bridge-PCA 0.1.6 G - 4g - W3 Constants   ////////////////////////\r\n\r\n    const mainTRC = 2.4; // 2.4 exponent emulates actual monitor perception\r\n\r\n    const sRco = 0.212647813391364,\r\n      sGco = 0.715179147533615,\r\n      sBco = 0.0721730390750208; // sRGB coefficients\r\n\r\n    // Derived from:\r\n    // xW\tyW\tK\txR\tyR\txG\tyG\txB\tyB\r\n    // 0.312720\t0.329030\t6504\t0.640\t0.330\t0.300\t0.600\t0.150\t0.060\r\n\r\n    // linearize r, g, or b then apply coefficients\r\n    // and sum then return the resulting luminance\r\n\r\n    function simpleExp(chan: number) {\r\n      return Math.pow(chan / 255.0, mainTRC);\r\n    }\r\n\r\n    return (\r\n      sRco * simpleExp(rgba[0]) +\r\n      sGco * simpleExp(rgba[1]) +\r\n      sBco * simpleExp(rgba[2])\r\n    );\r\n  } // End sRGBtoY()\r\n\r\n  alphaBlend(rgbaFG = [0, 0, 0, 1.0], rgbBG = [0, 0, 0], isInt = true) {\r\n    if (rgbaFG[3]) {\r\n      rgbaFG[3] = Math.max(Math.min(rgbaFG[3], 1.0), 0.0); // clamp alpha\r\n      let compBlend = 1.0 - rgbaFG[3];\r\n      let rgbOut = [0, 0, 0]; // or just use rgbBG to retain other elements?\r\n\r\n      for (let i = 0; i < 3; i++) {\r\n        rgbOut[i] = rgbBG[i] * compBlend + rgbaFG[i] * rgbaFG[3];\r\n        if (isInt) rgbOut[i] = Math.min(Math.round(rgbOut[i]), 255);\r\n      }\r\n\r\n      return rgbOut;\r\n    } else {\r\n      return rgbaFG;\r\n    }\r\n  } // End alphaBlend()\r\n\r\n  calcBPCA(textColor: string, bgColor: string, places = -1, isInt = true) {\r\n    // NOTE:  that this function required colorParsley !!\r\n    // let txClr = colorParsley(textColor);\r\n    // let bgClr = colorParsley(bgColor);\r\n    // let hasAlpha = txClr[3] != '' && txClr[3] < 1 ? true : false;\r\n    // if (hasAlpha) {\r\n    // txClr = this.alphaBlend(txClr, bgClr, isInt);\r\n    // }\r\n    // return this.BPCAcontrast(this.sRGBtoY(txClr), this.sRGBtoY(bgClr), places);\r\n\r\n    let bpca: string | number = NaN;\r\n\r\n    let txClr = this.cus.getRgb255Array(textColor);\r\n    let bgClr = this.cus.getRgb255Array(bgColor);\r\n\r\n    if (txClr && bgClr) {\r\n      bpca = this.BPCAcontrast(\r\n        this.sRGBtoY(txClr),\r\n        this.sRGBtoY(bgClr),\r\n        places\r\n      );\r\n    } else {\r\n      console.warn(`issue calculating BPCA`);\r\n    }\r\n\r\n    return bpca;\r\n  } // End calcBPCA()\r\n}\r\n",
+            "extends": [],
+            "type": "injectable"
+        },
+        {
+            "name": "ColorMetricsService",
+            "id": "injectable-ColorMetricsService-8766c9abd832330ff17221c3e43e4f777b3c55554086ce9bf7dc7f318c3d832d9fa3b6191da62fb9ccc37f8e2ab2c529eda6683f219957ef7597394d5cfe7a81",
+            "file": "src/app/services/color-metrics.service.ts",
+            "properties": [
+                {
+                    "name": "apcaToWcagLookup",
+                    "defaultValue": "{}",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "NumberKeyLookup",
+                    "optional": false,
+                    "description": "",
+                    "line": 24
+                },
+                {
+                    "name": "apcaToWcagLookupAlt",
+                    "defaultValue": "{}",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "NumberKeyLookup",
+                    "optional": false,
+                    "description": "",
+                    "line": 25
+                },
+                {
+                    "name": "bpca",
+                    "defaultValue": "inject(BpcaService)",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 20
+                },
+                {
+                    "name": "cus",
+                    "defaultValue": "inject(ColorUtilService)",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 19
+                },
+                {
+                    "name": "dev",
+                    "defaultValue": "true",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 22
+                }
+            ],
+            "methods": [
+                {
+                    "name": "calcRawApcaContrast",
+                    "args": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number | null",
+                    "typeParameters": [],
+                    "line": 55,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "calcRawBpcaContrast",
+                    "args": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number",
+                    "typeParameters": [],
+                    "line": 63,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getContrast",
+                    "args": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "contrastType",
+                            "type": "ContrastType",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number | null",
+                    "typeParameters": [],
+                    "line": 27,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "contrastType",
+                            "type": "ContrastType",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "description": "",
+            "rawdescription": "\n",
+            "sourceCode": "import { Injectable, inject } from '@angular/core';\r\n\r\nimport { calcAPCA, sRGBtoY } from 'apca-w3';\r\n\r\nimport { scaleLinear } from 'd3';\r\n\r\nimport { ColorUtilService } from './color-util.service';\r\nimport { BpcaService } from './bpca.service';\r\n\r\nexport interface NumberKeyLookup {\r\n  [key: number]: number;\r\n}\r\n\r\nexport type ContrastType = 'apca' | 'bpca';\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorMetricsService {\r\n  cus = inject(ColorUtilService);\r\n  bpca = inject(BpcaService);\r\n\r\n  dev: boolean = true;\r\n\r\n  apcaToWcagLookup: NumberKeyLookup = {};\r\n  apcaToWcagLookupAlt: NumberKeyLookup = {};\r\n\r\n  getContrast(\r\n    colorOne: string,\r\n    colorTwo: string,\r\n    contrastType: ContrastType\r\n  ): number | null {\r\n    let score: number | null = null;\r\n\r\n    const contrast = this.calcRawApcaContrast(colorOne, colorTwo);\r\n\r\n    if (contrast || contrast === 0) {\r\n      if (contrastType === 'apca') {\r\n        const roundedContrast = contrast.toFixed(0);\r\n\r\n        score = parseInt(roundedContrast);\r\n      }\r\n\r\n      if (contrastType === 'bpca') {\r\n        const bpcaScore = this.calcRawBpcaContrast(colorOne, colorTwo);\r\n\r\n        score = bpcaScore;\r\n      }\r\n    } else {\r\n      console.error(`Raw APCA contrast was not calculable`);\r\n    }\r\n\r\n    return score;\r\n  }\r\n\r\n  calcRawApcaContrast(colorOne: string, colorTwo: string): number | null {\r\n    let score: number | null = null;\r\n\r\n    score = calcAPCA(colorOne, colorTwo);\r\n\r\n    return score;\r\n  }\r\n\r\n  calcRawBpcaContrast(colorOne: string, colorTwo: string) {\r\n    let wcag: number = NaN;\r\n\r\n    const lc = this.bpca.calcBPCA(colorOne, colorTwo) as number;\r\n    const colorOneArray255 = this.cus.getRgb255Array(colorOne);\r\n    const colorTwoArray255 = this.cus.getRgb255Array(colorTwo);\r\n\r\n    if (colorOneArray255 && colorTwoArray255) {\r\n      const colorOneY = this.bpca.sRGBtoY(colorOneArray255);\r\n      const colorTwoY = this.bpca.sRGBtoY(colorTwoArray255);\r\n\r\n      wcag = parseFloat(this.bpca.bridgeRatio(lc, colorOneY, colorTwoY, ''));\r\n    } else {\r\n      console.warn(`trouble calculating raw BPCA`);\r\n    }\r\n\r\n    return wcag;\r\n  }\r\n}\r\n",
+            "extends": [],
+            "type": "injectable"
+        },
+        {
+            "name": "ColorUtilService",
+            "id": "injectable-ColorUtilService-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
+            "file": "src/app/services/color-util.service.ts",
+            "properties": [],
+            "methods": [
+                {
+                    "name": "adjustColorPairForPresentation",
+                    "args": [
+                        {
+                            "name": "pair",
+                            "type": "ColorPair",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<ColorPair>",
+                    "typeParameters": [],
+                    "line": 278,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "pair",
+                            "type": "ColorPair",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "calcDeltaE",
+                    "args": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number | null",
+                    "typeParameters": [],
+                    "line": 406,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "calcWcag2",
+                    "args": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number | null",
+                    "typeParameters": [],
+                    "line": 427,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "colorOne",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "colorTwo",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "createSrgbColor",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "lightness",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | null",
+                    "typeParameters": [],
+                    "line": 72,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "lightness",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "createVariants",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Array | null",
+                    "typeParameters": [],
+                    "line": 122,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "filterOutOfGamutVariants",
+                    "args": [
+                        {
+                            "name": "variants",
+                            "type": "Array<ColorCoordArray> | null",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<Array<ColorCoordArray>>",
+                    "typeParameters": [],
+                    "line": 160,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "variants",
+                            "type": "Array<ColorCoordArray> | null",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "generateAllOklchVariants",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "lightSteps",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "chromaSteps",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<TableData>",
+                    "typeParameters": [],
+                    "line": 496,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "lightSteps",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "chromaSteps",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getColorMeta",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "ColorMetaObj | null",
+                    "typeParameters": [],
+                    "line": 447,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getMinMaxLight",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<MinMaxLightObject | null>",
+                    "typeParameters": [],
+                    "line": 190,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getMinObjectDimension",
+                    "args": [
+                        {
+                            "name": "apca",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number",
+                    "typeParameters": [],
+                    "line": 468,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "apca",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getRandomColorPair",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Promise<ColorPair>",
+                    "typeParameters": [],
+                    "line": 238,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ]
+                },
+                {
+                    "name": "getRgb255Array",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "[number, number, number]",
+                    "typeParameters": [],
+                    "line": 52,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "isInSrgbGamut",
+                    "args": [
+                        {
+                            "name": "oklchColorCoord",
+                            "type": "ColorCoordArray",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<boolean>",
+                    "typeParameters": [],
+                    "line": 109,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "oklchColorCoord",
+                            "type": "ColorCoordArray",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "matchChromas",
+                    "args": [
+                        {
+                            "name": "colorpair",
+                            "type": "ColorPair",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Promise<ChromaMatchObject>",
+                    "typeParameters": [],
+                    "line": 313,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "colorpair",
+                            "type": "ColorPair",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "parseColor",
+                    "args": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "ColorConstructor | null",
+                    "typeParameters": [],
+                    "line": 41,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "color",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "description": "",
+            "rawdescription": "\n",
+            "sourceCode": "import { Injectable } from '@angular/core';\r\nimport Color from 'colorjs.io';\r\nimport { to } from 'colorjs.io/fn';\r\nimport { ColorConstructor } from 'colorjs.io/types/src/color';\r\nimport { scaleLinear, sort } from 'd3';\r\nimport { random, reverse, uniqBy, uniq } from 'lodash';\r\nimport {\r\n  TableColorCell,\r\n  TableData,\r\n} from '../palette-table/palette-table.component';\r\n\r\nexport type ColorPair = [string, string];\r\n\r\nexport type ColorCoordArray = [number, number, number];\r\n\r\nexport class ChromaMatchObject {\r\n  success: boolean = false;\r\n  colors: ColorPair | null = null;\r\n  chroma: number | null = null;\r\n}\r\n\r\nexport interface MinMaxLightObject {\r\n  originalCoords: ColorCoordArray;\r\n  lightMin: number;\r\n  lightMax: number;\r\n}\r\n\r\n// export type ColorVariant = [number, number, number];\r\n\r\nexport interface ColorMetaObj {\r\n  lightness: number | string;\r\n  chroma: number | string;\r\n  hue: number | string;\r\n  saturation: number | string;\r\n}\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorUtilService {\r\n  parseColor(color: string): ColorConstructor | null {\r\n    let parsedColor: ColorConstructor | null = null;\r\n\r\n    try {\r\n      parsedColor = Color.parse(color);\r\n    } catch (error) {\r\n      console.error(error);\r\n    }\r\n    return parsedColor;\r\n  }\r\n\r\n  getRgb255Array(color: string) {\r\n    const colorObj = this.parseColor(color);\r\n\r\n    let array255: [number, number, number] | null = null;\r\n\r\n    if (colorObj) {\r\n      const colorCoordsDecimal = colorObj.coords;\r\n\r\n      array255 = [\r\n        Math.round(colorCoordsDecimal[0] * 255),\r\n        Math.round(colorCoordsDecimal[1] * 255),\r\n        Math.round(colorCoordsDecimal[2] * 255),\r\n      ];\r\n    } else {\r\n      console.error(`unable to parse: ${color}`);\r\n    }\r\n\r\n    return array255;\r\n  }\r\n\r\n  createSrgbColor(color: string, lightness: number): string | null {\r\n    let srgbColor: string | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const originalChroma = oklchColor.coords[1];\r\n      const originalHue = oklchColor.coords[2];\r\n\r\n      const targetColor = new Color('oklch', [\r\n        lightness,\r\n        originalChroma,\r\n        originalHue,\r\n      ]);\r\n\r\n      // const inSrgbGamut = targetColor.inGamut('srgb');\r\n\r\n      // if (!inSrgbGamut) {\r\n      //   console.warn(\r\n      //     `OKLCH color in SRGB gamut: ${targetColor.inGamut('srgb')}`\r\n      //   );\r\n      // }\r\n\r\n      const tColorInSrgbGamut = targetColor.toGamut({\r\n        space: 'srgb',\r\n        method: 'oklch.c',\r\n      });\r\n\r\n      const targetColorAsRgbColor = tColorInSrgbGamut.to('srgb');\r\n\r\n      srgbColor = targetColorAsRgbColor.toString({ format: 'hex' });\r\n    }\r\n\r\n    return srgbColor;\r\n  }\r\n\r\n  isInSrgbGamut(oklchColorCoord: ColorCoordArray): Promise<boolean> {\r\n    return new Promise<boolean>((resolve, reject) => {\r\n      try {\r\n        const colorObject = new Color('oklch', oklchColorCoord);\r\n        const variantInGamut = colorObject.inGamut('srgb');\r\n\r\n        resolve(variantInGamut);\r\n      } catch (error) {\r\n        reject(error);\r\n      }\r\n    });\r\n  }\r\n\r\n  createVariants(color: string): Array<ColorCoordArray> | null {\r\n    let variantCollection: Array<ColorCoordArray> | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const lchCooords = oklchColor.coords;\r\n      const colorChroma = lchCooords[1];\r\n      const colorHue = lchCooords[2];\r\n\r\n      // 1) create enough steps of lightness\r\n      const lightnessSteps = 1000;\r\n      const lightMax = 1;\r\n      const lightMin = 0;\r\n      const lightInterval = (lightMax - lightMin) / lightnessSteps;\r\n\r\n      // 2) create all variants of color using constant chroma and hue.\r\n      variantCollection = [];\r\n\r\n      // 2a) this actually creates `lightnessSteps + 1` variants as initial variant has to start at zero.\r\n      for (let i = 0; i <= lightnessSteps; i++) {\r\n        const variantTargetLight = i * lightInterval;\r\n        const variant: ColorCoordArray = [\r\n          variantTargetLight,\r\n          colorChroma,\r\n          colorHue,\r\n        ];\r\n\r\n        variantCollection.push(variant);\r\n      }\r\n    } else {\r\n      console.error(`unable to parse color`);\r\n    }\r\n\r\n    return variantCollection;\r\n  }\r\n\r\n  filterOutOfGamutVariants(\r\n    variants: Array<ColorCoordArray> | null\r\n  ): Promise<Array<ColorCoordArray>> {\r\n    return new Promise(async (resolve, reject) => {\r\n      if (!variants) {\r\n        reject(`no variants`);\r\n      } else {\r\n        let filteringComplete: boolean = false;\r\n\r\n        const filtered = [];\r\n\r\n        for (let i = 0; i < variants.length; i++) {\r\n          const curVariant = variants[i];\r\n\r\n          if (await this.isInSrgbGamut(curVariant)) {\r\n            filtered.push(curVariant);\r\n          }\r\n\r\n          if (i === variants.length - 1) filteringComplete = true;\r\n        }\r\n\r\n        if (filteringComplete) {\r\n          resolve(filtered);\r\n        } else {\r\n          reject(`error`);\r\n        }\r\n      }\r\n    });\r\n  }\r\n\r\n  async getMinMaxLight(color: string): Promise<MinMaxLightObject | null> {\r\n    let returnedObject: MinMaxLightObject | null = null;\r\n\r\n    const initVariantCollection = this.createVariants(color);\r\n\r\n    const variantCollection = await this.filterOutOfGamutVariants(\r\n      initVariantCollection\r\n    );\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor && variantCollection.length) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      const lchCooords = oklchColor.coords;\r\n\r\n      const oklchLightCoordIndex = 0;\r\n      const firstArrayItemIndex = 0;\r\n      const lastArrayItemIndex = variantCollection.length - 1;\r\n\r\n      const minLight =\r\n        variantCollection[firstArrayItemIndex][oklchLightCoordIndex];\r\n      const maxLight =\r\n        variantCollection[lastArrayItemIndex][oklchLightCoordIndex];\r\n\r\n      returnedObject = {\r\n        originalCoords: lchCooords,\r\n        lightMin: minLight,\r\n        lightMax: maxLight,\r\n      };\r\n    } else {\r\n      if (!parsedColor) {\r\n        console.error(`unable to parse color`);\r\n      } else {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n        const lchCooords = oklchColor.coords;\r\n        returnedObject = {\r\n          originalCoords: lchCooords,\r\n          lightMin: lchCooords[0],\r\n          lightMax: lchCooords[0],\r\n        };\r\n      }\r\n    }\r\n\r\n    return returnedObject;\r\n  }\r\n\r\n  async getRandomColorPair(): Promise<ColorPair> {\r\n    let pair: ColorPair = ['black', 'white'];\r\n\r\n    // ref: oklch.com\r\n    // const targetChroma = 0.11;\r\n    const targetChroma = random(0.11, 0.34, true);\r\n\r\n    const colorOneLight = random(0.25, 0.26, true);\r\n    const colorOneHue = random(0, 360, true);\r\n    const colorTwoLight = random(0.94, 0.95, true);\r\n    const colorTwoHue = random(0, 360, true);\r\n\r\n    const colorOne = new Color('oklch', [\r\n      colorOneLight,\r\n      targetChroma,\r\n      colorOneHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const colorTwo = new Color('oklch', [\r\n      colorTwoLight,\r\n      targetChroma,\r\n      colorTwoHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const initPair: ColorPair = [colorOne, colorTwo];\r\n\r\n    const chromaMatchedPair = await this.matchChromas(initPair);\r\n\r\n    pair = chromaMatchedPair.colors ? chromaMatchedPair.colors : pair;\r\n\r\n    return pair;\r\n  }\r\n\r\n  // This function only adjust the first color of the pair.\r\n  async adjustColorPairForPresentation(pair: ColorPair): Promise<ColorPair> {\r\n    let returnedPair: ColorPair = ['black', 'white'];\r\n\r\n    const colorOne = pair[0];\r\n    const colortwo = pair[1];\r\n\r\n    const parsedColorOne = this.parseColor(colorOne);\r\n\r\n    const colorOneMinMaxLightObj = await this.getMinMaxLight(colorOne);\r\n\r\n    if (parsedColorOne && colorOneMinMaxLightObj) {\r\n      const colorOneTargetLightness =\r\n        colorOneMinMaxLightObj.lightMin +\r\n        (colorOneMinMaxLightObj.lightMax - colorOneMinMaxLightObj.lightMin) / 2;\r\n\r\n      const oklchColorOne = new Color('srgb', parsedColorOne.coords).to(\r\n        'oklch'\r\n      );\r\n\r\n      const adjColorOne = new Color('oklch', [\r\n        colorOneTargetLightness,\r\n        oklchColorOne.coords[1],\r\n        oklchColorOne.coords[2],\r\n      ])\r\n        .to('srgb')\r\n        .toString({ format: 'hex' });\r\n\r\n      returnedPair = [adjColorOne, colortwo];\r\n    } else {\r\n      console.warn('trouble adjusting colors');\r\n    }\r\n\r\n    return returnedPair;\r\n  }\r\n\r\n  async matchChromas(colorpair: ColorPair): Promise<ChromaMatchObject> {\r\n    let pair: ChromaMatchObject = {\r\n      success: false,\r\n      colors: null,\r\n      chroma: null,\r\n    };\r\n\r\n    const colorOneParsed = this.parseColor(colorpair[0]);\r\n    const colorTwoParsed = this.parseColor(colorpair[1]);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneOklch = new Color('srgb', colorOneParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorOneChroma = colorOneOklch.coords[1];\r\n\r\n      const colorTwoOklch = new Color('srgb', colorTwoParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorTwoChroma = colorTwoOklch.coords[1];\r\n\r\n      const colorOneCandCoords: ColorCoordArray = [\r\n        colorOneOklch.coords[0],\r\n        colorTwoChroma,\r\n        colorOneOklch.coords[2],\r\n      ];\r\n      const colorTwoCandCoords: ColorCoordArray = [\r\n        colorTwoOklch.coords[0],\r\n        colorOneChroma,\r\n        colorTwoOklch.coords[2],\r\n      ];\r\n\r\n      const colorOneCandInGamut = await this.isInSrgbGamut(colorOneCandCoords);\r\n      const colorTwoCandInGamut = await this.isInSrgbGamut(colorTwoCandCoords);\r\n\r\n      if (colorOneCandInGamut && !colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          new Color('oklch', colorOneCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n          colorpair[1],\r\n        ];\r\n\r\n        pair.chroma = colorOneCandCoords[1];\r\n      }\r\n\r\n      if (!colorOneCandInGamut && colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          colorpair[0],\r\n          new Color('oklch', colorTwoCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n        ];\r\n\r\n        pair.chroma = colorTwoCandCoords[1];\r\n      }\r\n\r\n      if (colorOneCandInGamut && colorTwoCandInGamut) {\r\n        if (colorOneCandCoords[1] > colorTwoCandCoords[1]) {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            new Color('oklch', colorOneCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n            colorpair[1],\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        } else {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            colorpair[0],\r\n            new Color('oklch', colorTwoCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        }\r\n      }\r\n    } else {\r\n      console.error(\"color parsing didn't work out. \");\r\n    }\r\n\r\n    return pair;\r\n  }\r\n\r\n  calcDeltaE(colorOne: string, colorTwo: string): number | null {\r\n    let delta: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawDelta = colorOneObj.deltaE2000(colorTwoObj);\r\n\r\n      // const fixedDelta = rawDelta.toFixed(2);\r\n\r\n      // delta = parseFloat(fixedDelta);\r\n      delta = Math.round(rawDelta);\r\n    }\r\n\r\n    return delta;\r\n  }\r\n\r\n  calcWcag2(colorOne: string, colorTwo: string): number | null {\r\n    let wcag21: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawWcag21 = colorOneObj.contrast(colorTwoObj, 'WCAG21');\r\n\r\n      const fixedDelta = rawWcag21.toFixed(1);\r\n\r\n      wcag21 = parseFloat(fixedDelta);\r\n    }\r\n\r\n    return wcag21;\r\n  }\r\n\r\n  getColorMeta(color: string): ColorMetaObj | null {\r\n    let meta: ColorMetaObj | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const lchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      meta = {\r\n        lightness: lchColor.coords[0].toFixed(2),\r\n        chroma: lchColor.coords[1].toFixed(2),\r\n        hue: lchColor.coords[2].toFixed(2),\r\n        saturation: ((lchColor.coords[1] / lchColor.coords[0]) * 100).toFixed(\r\n          2\r\n        ),\r\n      };\r\n    }\r\n\r\n    return meta;\r\n  }\r\n\r\n  getMinObjectDimension(apca: number): number {\r\n    let dimension: number = NaN;\r\n\r\n    const absApca = Math.abs(apca);\r\n\r\n    const pixels = [1, 1.5, 2, 3, 4, 6, 8, 10, 15];\r\n    const apcaScores = [90, 75, 60, 50, 45, 30, 25, 20, 15];\r\n    const minLookup = scaleLinear(pixels).domain(apcaScores);\r\n\r\n    const initSize = minLookup(absApca).toFixed(2);\r\n\r\n    dimension = parseFloat(initSize);\r\n\r\n    if (dimension > 15) {\r\n      dimension = 15;\r\n    }\r\n\r\n    if (absApca >= 100) {\r\n      dimension = 0.25;\r\n    }\r\n\r\n    if (absApca < 15) {\r\n      dimension = NaN;\r\n    }\r\n\r\n    return dimension;\r\n  }\r\n\r\n  generateAllOklchVariants(\r\n    color: string,\r\n    lightSteps: number,\r\n    chromaSteps: number\r\n  ): Promise<TableData> {\r\n    return new Promise((resolve, reject) => {\r\n      const parsedColor = this.parseColor(color);\r\n\r\n      const variantsCollection = [];\r\n\r\n      let sortedVariantsCollection = [];\r\n\r\n      if (parsedColor) {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n        const lchCooords = oklchColor.coords;\r\n        const colorLight = lchCooords[0];\r\n        const colorChroma = lchCooords[1];\r\n        const colorHue = lchCooords[2];\r\n\r\n        const lightMax = 1;\r\n        const lightMin = 0;\r\n        const lightInterval = (lightMax - lightMin) / lightSteps;\r\n\r\n        // calculate light levels\r\n        const rawLightLevels = [];\r\n\r\n        let lLevel = colorLight;\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel + lightInterval;\r\n        } while (lLevel <= lightMax);\r\n\r\n        lLevel = colorLight;\r\n\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel - lightInterval;\r\n        } while (lLevel >= lightMin);\r\n\r\n        const sortedLightLevels = sort(uniq(rawLightLevels));\r\n\r\n        const chromaMax = 0.33;\r\n        const chromaMin = 0;\r\n        const chromaInterval = (chromaMax - chromaMin) / chromaSteps;\r\n\r\n        // calculate chroma levels\r\n        const rawChromaLevels = [];\r\n\r\n        let cLevel = colorChroma;\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel + chromaInterval;\r\n        } while (cLevel <= chromaMax);\r\n\r\n        cLevel = colorChroma;\r\n\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel - chromaInterval;\r\n        } while (cLevel >= chromaMin);\r\n\r\n        const sortedChromaLevels = sort(uniq(rawChromaLevels));\r\n\r\n        // generate all rows\r\n        for (let i = 0; i < sortedLightLevels.length; i++) {\r\n          const variantRow: Array<TableColorCell> = [];\r\n\r\n          for (let j = 0; j < sortedChromaLevels.length; j++) {\r\n            const targetLightness = sortedLightLevels[i];\r\n\r\n            const targetChroma = sortedChromaLevels[j];\r\n\r\n            const variantColor = new Color('oklch', [\r\n              targetLightness,\r\n              targetChroma,\r\n              colorHue,\r\n            ]);\r\n\r\n            const variantColorinGamut = variantColor.inGamut('srgb');\r\n\r\n            const colorVal = variantColorinGamut\r\n              ? variantColor.to('srgb').toString({ format: 'hex' })\r\n              : null;\r\n\r\n            const deltaE = colorVal ? this.calcDeltaE(colorVal, color) : null;\r\n\r\n            const dLight = colorVal\r\n              ? Math.round(((targetLightness - colorLight) / colorLight) * 100)\r\n              : null;\r\n\r\n            const dChroma = colorVal\r\n              ? Math.round(((targetChroma - colorChroma) / colorChroma) * 100)\r\n              : null;\r\n\r\n            const variantObj: TableColorCell = {\r\n              color: colorVal,\r\n              lightness: targetLightness,\r\n              chroma: targetChroma,\r\n              hue: colorHue,\r\n              deltaE: deltaE,\r\n              deltaChroma: dChroma,\r\n              deltaLightness: dLight,\r\n              // wacg2Comp: NaN,\r\n              // pContrast: NaN,\r\n            };\r\n\r\n            variantRow.push(variantObj);\r\n          }\r\n\r\n          variantsCollection.push(variantRow);\r\n        }\r\n      } else {\r\n        console.error(`could not parse color`);\r\n\r\n        reject(`could not parse color`);\r\n      }\r\n\r\n      // order color rows from light to dark\r\n      sortedVariantsCollection = reverse(variantsCollection);\r\n\r\n      resolve(sortedVariantsCollection);\r\n    });\r\n  }\r\n\r\n  constructor() {}\r\n}\r\n",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "args": [],
+                "line": 622
+            },
+            "extends": [],
+            "type": "injectable"
+        }
+    ],
     "guards": [],
     "interceptors": [],
-    "classes": [],
+    "classes": [
+        {
+            "name": "ChromaMatchObject",
+            "id": "class-ChromaMatchObject-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
+            "file": "src/app/services/color-util.service.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "class",
+            "sourceCode": "import { Injectable } from '@angular/core';\r\nimport Color from 'colorjs.io';\r\nimport { to } from 'colorjs.io/fn';\r\nimport { ColorConstructor } from 'colorjs.io/types/src/color';\r\nimport { scaleLinear, sort } from 'd3';\r\nimport { random, reverse, uniqBy, uniq } from 'lodash';\r\nimport {\r\n  TableColorCell,\r\n  TableData,\r\n} from '../palette-table/palette-table.component';\r\n\r\nexport type ColorPair = [string, string];\r\n\r\nexport type ColorCoordArray = [number, number, number];\r\n\r\nexport class ChromaMatchObject {\r\n  success: boolean = false;\r\n  colors: ColorPair | null = null;\r\n  chroma: number | null = null;\r\n}\r\n\r\nexport interface MinMaxLightObject {\r\n  originalCoords: ColorCoordArray;\r\n  lightMin: number;\r\n  lightMax: number;\r\n}\r\n\r\n// export type ColorVariant = [number, number, number];\r\n\r\nexport interface ColorMetaObj {\r\n  lightness: number | string;\r\n  chroma: number | string;\r\n  hue: number | string;\r\n  saturation: number | string;\r\n}\r\n\r\n@Injectable({\r\n  providedIn: 'root',\r\n})\r\nexport class ColorUtilService {\r\n  parseColor(color: string): ColorConstructor | null {\r\n    let parsedColor: ColorConstructor | null = null;\r\n\r\n    try {\r\n      parsedColor = Color.parse(color);\r\n    } catch (error) {\r\n      console.error(error);\r\n    }\r\n    return parsedColor;\r\n  }\r\n\r\n  getRgb255Array(color: string) {\r\n    const colorObj = this.parseColor(color);\r\n\r\n    let array255: [number, number, number] | null = null;\r\n\r\n    if (colorObj) {\r\n      const colorCoordsDecimal = colorObj.coords;\r\n\r\n      array255 = [\r\n        Math.round(colorCoordsDecimal[0] * 255),\r\n        Math.round(colorCoordsDecimal[1] * 255),\r\n        Math.round(colorCoordsDecimal[2] * 255),\r\n      ];\r\n    } else {\r\n      console.error(`unable to parse: ${color}`);\r\n    }\r\n\r\n    return array255;\r\n  }\r\n\r\n  createSrgbColor(color: string, lightness: number): string | null {\r\n    let srgbColor: string | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const originalChroma = oklchColor.coords[1];\r\n      const originalHue = oklchColor.coords[2];\r\n\r\n      const targetColor = new Color('oklch', [\r\n        lightness,\r\n        originalChroma,\r\n        originalHue,\r\n      ]);\r\n\r\n      // const inSrgbGamut = targetColor.inGamut('srgb');\r\n\r\n      // if (!inSrgbGamut) {\r\n      //   console.warn(\r\n      //     `OKLCH color in SRGB gamut: ${targetColor.inGamut('srgb')}`\r\n      //   );\r\n      // }\r\n\r\n      const tColorInSrgbGamut = targetColor.toGamut({\r\n        space: 'srgb',\r\n        method: 'oklch.c',\r\n      });\r\n\r\n      const targetColorAsRgbColor = tColorInSrgbGamut.to('srgb');\r\n\r\n      srgbColor = targetColorAsRgbColor.toString({ format: 'hex' });\r\n    }\r\n\r\n    return srgbColor;\r\n  }\r\n\r\n  isInSrgbGamut(oklchColorCoord: ColorCoordArray): Promise<boolean> {\r\n    return new Promise<boolean>((resolve, reject) => {\r\n      try {\r\n        const colorObject = new Color('oklch', oklchColorCoord);\r\n        const variantInGamut = colorObject.inGamut('srgb');\r\n\r\n        resolve(variantInGamut);\r\n      } catch (error) {\r\n        reject(error);\r\n      }\r\n    });\r\n  }\r\n\r\n  createVariants(color: string): Array<ColorCoordArray> | null {\r\n    let variantCollection: Array<ColorCoordArray> | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n      const lchCooords = oklchColor.coords;\r\n      const colorChroma = lchCooords[1];\r\n      const colorHue = lchCooords[2];\r\n\r\n      // 1) create enough steps of lightness\r\n      const lightnessSteps = 1000;\r\n      const lightMax = 1;\r\n      const lightMin = 0;\r\n      const lightInterval = (lightMax - lightMin) / lightnessSteps;\r\n\r\n      // 2) create all variants of color using constant chroma and hue.\r\n      variantCollection = [];\r\n\r\n      // 2a) this actually creates `lightnessSteps + 1` variants as initial variant has to start at zero.\r\n      for (let i = 0; i <= lightnessSteps; i++) {\r\n        const variantTargetLight = i * lightInterval;\r\n        const variant: ColorCoordArray = [\r\n          variantTargetLight,\r\n          colorChroma,\r\n          colorHue,\r\n        ];\r\n\r\n        variantCollection.push(variant);\r\n      }\r\n    } else {\r\n      console.error(`unable to parse color`);\r\n    }\r\n\r\n    return variantCollection;\r\n  }\r\n\r\n  filterOutOfGamutVariants(\r\n    variants: Array<ColorCoordArray> | null\r\n  ): Promise<Array<ColorCoordArray>> {\r\n    return new Promise(async (resolve, reject) => {\r\n      if (!variants) {\r\n        reject(`no variants`);\r\n      } else {\r\n        let filteringComplete: boolean = false;\r\n\r\n        const filtered = [];\r\n\r\n        for (let i = 0; i < variants.length; i++) {\r\n          const curVariant = variants[i];\r\n\r\n          if (await this.isInSrgbGamut(curVariant)) {\r\n            filtered.push(curVariant);\r\n          }\r\n\r\n          if (i === variants.length - 1) filteringComplete = true;\r\n        }\r\n\r\n        if (filteringComplete) {\r\n          resolve(filtered);\r\n        } else {\r\n          reject(`error`);\r\n        }\r\n      }\r\n    });\r\n  }\r\n\r\n  async getMinMaxLight(color: string): Promise<MinMaxLightObject | null> {\r\n    let returnedObject: MinMaxLightObject | null = null;\r\n\r\n    const initVariantCollection = this.createVariants(color);\r\n\r\n    const variantCollection = await this.filterOutOfGamutVariants(\r\n      initVariantCollection\r\n    );\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor && variantCollection.length) {\r\n      const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      const lchCooords = oklchColor.coords;\r\n\r\n      const oklchLightCoordIndex = 0;\r\n      const firstArrayItemIndex = 0;\r\n      const lastArrayItemIndex = variantCollection.length - 1;\r\n\r\n      const minLight =\r\n        variantCollection[firstArrayItemIndex][oklchLightCoordIndex];\r\n      const maxLight =\r\n        variantCollection[lastArrayItemIndex][oklchLightCoordIndex];\r\n\r\n      returnedObject = {\r\n        originalCoords: lchCooords,\r\n        lightMin: minLight,\r\n        lightMax: maxLight,\r\n      };\r\n    } else {\r\n      if (!parsedColor) {\r\n        console.error(`unable to parse color`);\r\n      } else {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n\r\n        const lchCooords = oklchColor.coords;\r\n        returnedObject = {\r\n          originalCoords: lchCooords,\r\n          lightMin: lchCooords[0],\r\n          lightMax: lchCooords[0],\r\n        };\r\n      }\r\n    }\r\n\r\n    return returnedObject;\r\n  }\r\n\r\n  async getRandomColorPair(): Promise<ColorPair> {\r\n    let pair: ColorPair = ['black', 'white'];\r\n\r\n    // ref: oklch.com\r\n    // const targetChroma = 0.11;\r\n    const targetChroma = random(0.11, 0.34, true);\r\n\r\n    const colorOneLight = random(0.25, 0.26, true);\r\n    const colorOneHue = random(0, 360, true);\r\n    const colorTwoLight = random(0.94, 0.95, true);\r\n    const colorTwoHue = random(0, 360, true);\r\n\r\n    const colorOne = new Color('oklch', [\r\n      colorOneLight,\r\n      targetChroma,\r\n      colorOneHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const colorTwo = new Color('oklch', [\r\n      colorTwoLight,\r\n      targetChroma,\r\n      colorTwoHue,\r\n    ])\r\n      .toGamut({ space: 'srgb', method: 'oklch.c' })\r\n      .to('srgb')\r\n      .toString({ format: 'hex' });\r\n\r\n    const initPair: ColorPair = [colorOne, colorTwo];\r\n\r\n    const chromaMatchedPair = await this.matchChromas(initPair);\r\n\r\n    pair = chromaMatchedPair.colors ? chromaMatchedPair.colors : pair;\r\n\r\n    return pair;\r\n  }\r\n\r\n  // This function only adjust the first color of the pair.\r\n  async adjustColorPairForPresentation(pair: ColorPair): Promise<ColorPair> {\r\n    let returnedPair: ColorPair = ['black', 'white'];\r\n\r\n    const colorOne = pair[0];\r\n    const colortwo = pair[1];\r\n\r\n    const parsedColorOne = this.parseColor(colorOne);\r\n\r\n    const colorOneMinMaxLightObj = await this.getMinMaxLight(colorOne);\r\n\r\n    if (parsedColorOne && colorOneMinMaxLightObj) {\r\n      const colorOneTargetLightness =\r\n        colorOneMinMaxLightObj.lightMin +\r\n        (colorOneMinMaxLightObj.lightMax - colorOneMinMaxLightObj.lightMin) / 2;\r\n\r\n      const oklchColorOne = new Color('srgb', parsedColorOne.coords).to(\r\n        'oklch'\r\n      );\r\n\r\n      const adjColorOne = new Color('oklch', [\r\n        colorOneTargetLightness,\r\n        oklchColorOne.coords[1],\r\n        oklchColorOne.coords[2],\r\n      ])\r\n        .to('srgb')\r\n        .toString({ format: 'hex' });\r\n\r\n      returnedPair = [adjColorOne, colortwo];\r\n    } else {\r\n      console.warn('trouble adjusting colors');\r\n    }\r\n\r\n    return returnedPair;\r\n  }\r\n\r\n  async matchChromas(colorpair: ColorPair): Promise<ChromaMatchObject> {\r\n    let pair: ChromaMatchObject = {\r\n      success: false,\r\n      colors: null,\r\n      chroma: null,\r\n    };\r\n\r\n    const colorOneParsed = this.parseColor(colorpair[0]);\r\n    const colorTwoParsed = this.parseColor(colorpair[1]);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneOklch = new Color('srgb', colorOneParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorOneChroma = colorOneOklch.coords[1];\r\n\r\n      const colorTwoOklch = new Color('srgb', colorTwoParsed.coords).to(\r\n        'oklch'\r\n      );\r\n      const colorTwoChroma = colorTwoOklch.coords[1];\r\n\r\n      const colorOneCandCoords: ColorCoordArray = [\r\n        colorOneOklch.coords[0],\r\n        colorTwoChroma,\r\n        colorOneOklch.coords[2],\r\n      ];\r\n      const colorTwoCandCoords: ColorCoordArray = [\r\n        colorTwoOklch.coords[0],\r\n        colorOneChroma,\r\n        colorTwoOklch.coords[2],\r\n      ];\r\n\r\n      const colorOneCandInGamut = await this.isInSrgbGamut(colorOneCandCoords);\r\n      const colorTwoCandInGamut = await this.isInSrgbGamut(colorTwoCandCoords);\r\n\r\n      if (colorOneCandInGamut && !colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          new Color('oklch', colorOneCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n          colorpair[1],\r\n        ];\r\n\r\n        pair.chroma = colorOneCandCoords[1];\r\n      }\r\n\r\n      if (!colorOneCandInGamut && colorTwoCandInGamut) {\r\n        pair.success = true;\r\n\r\n        pair.colors = [\r\n          colorpair[0],\r\n          new Color('oklch', colorTwoCandCoords)\r\n            .to('srgb')\r\n            .toString({ format: 'hex' }),\r\n        ];\r\n\r\n        pair.chroma = colorTwoCandCoords[1];\r\n      }\r\n\r\n      if (colorOneCandInGamut && colorTwoCandInGamut) {\r\n        if (colorOneCandCoords[1] > colorTwoCandCoords[1]) {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            new Color('oklch', colorOneCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n            colorpair[1],\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        } else {\r\n          pair.success = true;\r\n\r\n          pair.colors = [\r\n            colorpair[0],\r\n            new Color('oklch', colorTwoCandCoords)\r\n              .to('srgb')\r\n              .toString({ format: 'hex' }),\r\n          ];\r\n\r\n          pair.chroma = colorTwoCandCoords[1];\r\n        }\r\n      }\r\n    } else {\r\n      console.error(\"color parsing didn't work out. \");\r\n    }\r\n\r\n    return pair;\r\n  }\r\n\r\n  calcDeltaE(colorOne: string, colorTwo: string): number | null {\r\n    let delta: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawDelta = colorOneObj.deltaE2000(colorTwoObj);\r\n\r\n      // const fixedDelta = rawDelta.toFixed(2);\r\n\r\n      // delta = parseFloat(fixedDelta);\r\n      delta = Math.round(rawDelta);\r\n    }\r\n\r\n    return delta;\r\n  }\r\n\r\n  calcWcag2(colorOne: string, colorTwo: string): number | null {\r\n    let wcag21: number | null = null;\r\n\r\n    const colorOneParsed = this.parseColor(colorOne);\r\n    const colorTwoParsed = this.parseColor(colorTwo);\r\n\r\n    if (colorOneParsed && colorTwoParsed) {\r\n      const colorOneObj = new Color('srgb', colorOneParsed.coords);\r\n      const colorTwoObj = new Color('srgb', colorTwoParsed.coords);\r\n\r\n      const rawWcag21 = colorOneObj.contrast(colorTwoObj, 'WCAG21');\r\n\r\n      const fixedDelta = rawWcag21.toFixed(1);\r\n\r\n      wcag21 = parseFloat(fixedDelta);\r\n    }\r\n\r\n    return wcag21;\r\n  }\r\n\r\n  getColorMeta(color: string): ColorMetaObj | null {\r\n    let meta: ColorMetaObj | null = null;\r\n\r\n    const parsedColor = this.parseColor(color);\r\n\r\n    if (parsedColor) {\r\n      const lchColor = Color.to(parsedColor, 'oklch');\r\n\r\n      meta = {\r\n        lightness: lchColor.coords[0].toFixed(2),\r\n        chroma: lchColor.coords[1].toFixed(2),\r\n        hue: lchColor.coords[2].toFixed(2),\r\n        saturation: ((lchColor.coords[1] / lchColor.coords[0]) * 100).toFixed(\r\n          2\r\n        ),\r\n      };\r\n    }\r\n\r\n    return meta;\r\n  }\r\n\r\n  getMinObjectDimension(apca: number): number {\r\n    let dimension: number = NaN;\r\n\r\n    const absApca = Math.abs(apca);\r\n\r\n    const pixels = [1, 1.5, 2, 3, 4, 6, 8, 10, 15];\r\n    const apcaScores = [90, 75, 60, 50, 45, 30, 25, 20, 15];\r\n    const minLookup = scaleLinear(pixels).domain(apcaScores);\r\n\r\n    const initSize = minLookup(absApca).toFixed(2);\r\n\r\n    dimension = parseFloat(initSize);\r\n\r\n    if (dimension > 15) {\r\n      dimension = 15;\r\n    }\r\n\r\n    if (absApca >= 100) {\r\n      dimension = 0.25;\r\n    }\r\n\r\n    if (absApca < 15) {\r\n      dimension = NaN;\r\n    }\r\n\r\n    return dimension;\r\n  }\r\n\r\n  generateAllOklchVariants(\r\n    color: string,\r\n    lightSteps: number,\r\n    chromaSteps: number\r\n  ): Promise<TableData> {\r\n    return new Promise((resolve, reject) => {\r\n      const parsedColor = this.parseColor(color);\r\n\r\n      const variantsCollection = [];\r\n\r\n      let sortedVariantsCollection = [];\r\n\r\n      if (parsedColor) {\r\n        const oklchColor = Color.to(parsedColor, 'oklch');\r\n        const lchCooords = oklchColor.coords;\r\n        const colorLight = lchCooords[0];\r\n        const colorChroma = lchCooords[1];\r\n        const colorHue = lchCooords[2];\r\n\r\n        const lightMax = 1;\r\n        const lightMin = 0;\r\n        const lightInterval = (lightMax - lightMin) / lightSteps;\r\n\r\n        // calculate light levels\r\n        const rawLightLevels = [];\r\n\r\n        let lLevel = colorLight;\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel + lightInterval;\r\n        } while (lLevel <= lightMax);\r\n\r\n        lLevel = colorLight;\r\n\r\n        do {\r\n          rawLightLevels.push(lLevel);\r\n\r\n          lLevel = lLevel - lightInterval;\r\n        } while (lLevel >= lightMin);\r\n\r\n        const sortedLightLevels = sort(uniq(rawLightLevels));\r\n\r\n        const chromaMax = 0.33;\r\n        const chromaMin = 0;\r\n        const chromaInterval = (chromaMax - chromaMin) / chromaSteps;\r\n\r\n        // calculate chroma levels\r\n        const rawChromaLevels = [];\r\n\r\n        let cLevel = colorChroma;\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel + chromaInterval;\r\n        } while (cLevel <= chromaMax);\r\n\r\n        cLevel = colorChroma;\r\n\r\n        do {\r\n          rawChromaLevels.push(cLevel);\r\n\r\n          cLevel = cLevel - chromaInterval;\r\n        } while (cLevel >= chromaMin);\r\n\r\n        const sortedChromaLevels = sort(uniq(rawChromaLevels));\r\n\r\n        // generate all rows\r\n        for (let i = 0; i < sortedLightLevels.length; i++) {\r\n          const variantRow: Array<TableColorCell> = [];\r\n\r\n          for (let j = 0; j < sortedChromaLevels.length; j++) {\r\n            const targetLightness = sortedLightLevels[i];\r\n\r\n            const targetChroma = sortedChromaLevels[j];\r\n\r\n            const variantColor = new Color('oklch', [\r\n              targetLightness,\r\n              targetChroma,\r\n              colorHue,\r\n            ]);\r\n\r\n            const variantColorinGamut = variantColor.inGamut('srgb');\r\n\r\n            const colorVal = variantColorinGamut\r\n              ? variantColor.to('srgb').toString({ format: 'hex' })\r\n              : null;\r\n\r\n            const deltaE = colorVal ? this.calcDeltaE(colorVal, color) : null;\r\n\r\n            const dLight = colorVal\r\n              ? Math.round(((targetLightness - colorLight) / colorLight) * 100)\r\n              : null;\r\n\r\n            const dChroma = colorVal\r\n              ? Math.round(((targetChroma - colorChroma) / colorChroma) * 100)\r\n              : null;\r\n\r\n            const variantObj: TableColorCell = {\r\n              color: colorVal,\r\n              lightness: targetLightness,\r\n              chroma: targetChroma,\r\n              hue: colorHue,\r\n              deltaE: deltaE,\r\n              deltaChroma: dChroma,\r\n              deltaLightness: dLight,\r\n              // wacg2Comp: NaN,\r\n              // pContrast: NaN,\r\n            };\r\n\r\n            variantRow.push(variantObj);\r\n          }\r\n\r\n          variantsCollection.push(variantRow);\r\n        }\r\n      } else {\r\n        console.error(`could not parse color`);\r\n\r\n        reject(`could not parse color`);\r\n      }\r\n\r\n      // order color rows from light to dark\r\n      sortedVariantsCollection = reverse(variantsCollection);\r\n\r\n      resolve(sortedVariantsCollection);\r\n    });\r\n  }\r\n\r\n  constructor() {}\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "chroma",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 19
+                },
+                {
+                    "name": "colors",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ColorPair | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 18
+                },
+                {
+                    "name": "success",
+                    "defaultValue": "false",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 17
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "extends": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "TableColorCell",
+            "id": "class-TableColorCell-a6a03c6206bf595143b3f7d21afab4f4df5d1d3aec6a6711345b00465fe507259162381cca5ed1840bd3c06962c2a46de601b511dba7461cb565c3f09045777c",
+            "file": "src/app/palette-table/palette-table.component.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "class",
+            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "chroma",
+                    "defaultValue": "NaN",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 17
+                },
+                {
+                    "name": "color",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 15
+                },
+                {
+                    "name": "deltaChroma",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 21
+                },
+                {
+                    "name": "deltaE",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 19
+                },
+                {
+                    "name": "deltaLightness",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 20
+                },
+                {
+                    "name": "hue",
+                    "defaultValue": "NaN",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 18
+                },
+                {
+                    "name": "lightness",
+                    "defaultValue": "NaN",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 16
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "extends": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        }
+    ],
     "directives": [],
     "components": [
         {
@@ -396,6 +1730,257 @@
             ],
             "stylesData": "",
             "extends": []
+        },
+        {
+            "name": "PaletteTableComponent",
+            "id": "component-PaletteTableComponent-a6a03c6206bf595143b3f7d21afab4f4df5d1d3aec6a6711345b00465fe507259162381cca5ed1840bd3c06962c2a46de601b511dba7461cb565c3f09045777c",
+            "file": "src/app/palette-table/palette-table.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-palette-table",
+            "styleUrls": [
+                "./palette-table.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./palette-table.component.html"
+            ],
+            "viewProviders": [],
+            "hostDirectives": [],
+            "inputsClass": [
+                {
+                    "name": "color",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 37,
+                    "type": "string | null",
+                    "decorators": []
+                }
+            ],
+            "outputsClass": [
+                {
+                    "name": "selectedColor",
+                    "defaultValue": "new EventEmitter<TableColorCell>()",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "line": 39,
+                    "type": "EventEmitter"
+                }
+            ],
+            "propertiesClass": [
+                {
+                    "name": "chromaSteps",
+                    "defaultValue": "14",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 44
+                },
+                {
+                    "name": "cus",
+                    "defaultValue": "inject(ColorUtilService)",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 41
+                },
+                {
+                    "name": "dataStruct",
+                    "defaultValue": "[]",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "TableData",
+                    "optional": false,
+                    "description": "",
+                    "line": 49
+                },
+                {
+                    "name": "lightSteps",
+                    "defaultValue": "5",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 43
+                },
+                {
+                    "name": "tableHeaders",
+                    "defaultValue": "[]",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "Array<number>",
+                    "optional": false,
+                    "description": "",
+                    "line": 46
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "getTableColumnHeaders",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 51,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "getTableData",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "any",
+                    "typeParameters": [],
+                    "line": 80,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ]
+                },
+                {
+                    "name": "getTextColor",
+                    "args": [
+                        {
+                            "name": "bkgdColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "\"white\" | \"black\"",
+                    "typeParameters": [],
+                    "line": 74,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "bkgdColor",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ngOnChanges",
+                    "args": [
+                        {
+                            "name": "changes",
+                            "type": "SimpleChanges",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 94,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "changes",
+                            "type": "SimpleChanges",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ngOnInit",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 100,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "selectColor",
+                    "args": [
+                        {
+                            "name": "rowNum",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "columnNum",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 65,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "rowNum",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "columnNum",
+                            "type": "number",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "deprecated": false,
+            "deprecationMessage": "",
+            "hostBindings": [],
+            "hostListeners": [],
+            "standalone": false,
+            "imports": [],
+            "description": "",
+            "rawdescription": "\n",
+            "type": "component",
+            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ".comp-container {\r\n  border-radius: 2px;\r\n\r\n  table {\r\n    border-collapse: collapse;\r\n\r\n    th {\r\n      font-family: var(--mono-font);\r\n    }\r\n\r\n    td {\r\n      margin: 0;\r\n      padding: 7.5px;\r\n      line-height: 0;\r\n    }\r\n\r\n    tbody {\r\n      th {\r\n        text-align: right;\r\n      }\r\n    }\r\n\r\n    button {\r\n      margin: 0;\r\n      padding: 0;\r\n      border: transparent 2px solid;\r\n      box-sizing: border-box;\r\n      border-radius: 5px;\r\n      min-width: 22px;\r\n      min-height: 22px;\r\n      line-height: 0;\r\n      font-size: 0;\r\n\r\n      span {\r\n        line-height: 0;\r\n      }\r\n\r\n      &:hover:not([disabled]) {\r\n        background-color: white !important;\r\n        border-color: #8f8f8f !important;\r\n      }\r\n    }\r\n  }\r\n}\r\n",
+                    "styleUrl": "./palette-table.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "extends": [],
+            "implements": [
+                "OnInit",
+                "OnChanges"
+            ],
+            "templateData": "<div class=\"comp-container\">\r\n  <table *ngIf=\"dataStruct\" [style.backgroundColor]=\"color\">\r\n    <caption class=\"sr-only\">\r\n      Collection of colors sharing the same hue organized by chroma as columns,\r\n      and lightness as rows. Selecting a button in the table will copy the its\r\n      color to the clipboard.\r\n    </caption>\r\n    <thead>\r\n      <tr class=\"sr-only\">\r\n        <!-- <tr> -->\r\n        <td>&nbsp;</td>\r\n        <th *ngFor=\"let header of tableHeaders\">{{ header.toFixed(5) }}</th>\r\n      </tr>\r\n    </thead>\r\n    <tbody>\r\n      <tr *ngFor=\"let row of dataStruct; index as i\">\r\n        <th class=\"sr-only\">{{ row[0][\"lightness\"].toFixed(5) }}</th>\r\n        <td *ngFor=\"let cell of row; index as j\">\r\n          <div>\r\n            <button\r\n              [disabled]=\"!cell.color\"\r\n              [style.backgroundColor]=\"cell.color ? cell.color : 'transparent'\"\r\n              [style.color]=\"cell.color ? getTextColor(cell.color) : 'black'\"\r\n              [style.borderColor]=\"cell.deltaE === 0 ? 'white' : 'auto'\"\r\n              [style.backgroundColor]=\"cell.deltaE === 0 ? 'black' : 'auto'\"\r\n              (click)=\"selectColor(i, j)\"\r\n            >\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\">{{ cell.color }}, </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\"\r\n                >{{ cell.deltaLightness }}%,\r\n              </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\"\r\n                >{{ cell.deltaChroma }}%,\r\n              </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\">{{ cell.deltaE }}</span>\r\n            </button>\r\n          </div>\r\n        </td>\r\n      </tr>\r\n    </tbody>\r\n  </table>\r\n</div>\r\n"
         }
     ],
     "modules": [],
@@ -492,6 +2077,26 @@
                 "defaultValue": "{\n  title: 'Example/Page',\n  component: PageComponent,\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen',\n  },\n}"
             },
             {
+                "name": "meta",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/palette-table/palette-table.stories.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "Meta<PaletteTableComponent>",
+                "defaultValue": "{\r\n  title: 'App/Palette Table',\r\n  component: PaletteTableComponent,\r\n  tags: ['autodocs'],\r\n  render: (args: PaletteTableComponent) => ({\r\n    props: {\r\n      ...args,\r\n    },\r\n  }),\r\n  argTypes: {\r\n    color: {\r\n      control: 'color',\r\n    },\r\n  },\r\n}"
+            },
+            {
+                "name": "Populated",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/palette-table/palette-table.stories.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "Story",
+                "defaultValue": "{\r\n  args: {\r\n    color: '#ff00ff',\r\n  },\r\n}"
+            },
+            {
                 "name": "preview",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
@@ -530,10 +2135,53 @@
                 "deprecationMessage": "",
                 "type": "Story",
                 "defaultValue": "{\n  args: {\n    size: 'small',\n    label: 'Button',\n  },\n}"
+            },
+            {
+                "name": "Typical",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/palette-table/palette-table.stories.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "type": "Story",
+                "defaultValue": "{\r\n  args: {},\r\n}"
             }
         ],
         "functions": [],
         "typealiases": [
+            {
+                "name": "ColorCoordArray",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "[number, number, number]",
+                "file": "src/app/services/color-util.service.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 189
+            },
+            {
+                "name": "ColorPair",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "[string, string]",
+                "file": "src/app/services/color-util.service.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 189
+            },
+            {
+                "name": "ContrastType",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "\"apca\" | \"bpca\"",
+                "file": "src/app/services/color-metrics.service.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 192
+            },
             {
                 "name": "Story",
                 "ctype": "miscellaneous",
@@ -562,6 +2210,39 @@
                 "subtype": "typealias",
                 "rawtype": "StoryObj<PageComponent>",
                 "file": "src/stories/page.stories.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 183
+            },
+            {
+                "name": "Story",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "StoryObj<PaletteTableComponent>",
+                "file": "src/app/palette-table/palette-table.stories.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 183
+            },
+            {
+                "name": "TableData",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "Array<TableRow>",
+                "file": "src/app/palette-table/palette-table.component.ts",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "description": "",
+                "kind": 183
+            },
+            {
+                "name": "TableRow",
+                "ctype": "miscellaneous",
+                "subtype": "typealias",
+                "rawtype": "Array<TableColorCell>",
+                "file": "src/app/palette-table/palette-table.component.ts",
                 "deprecated": false,
                 "deprecationMessage": "",
                 "description": "",
@@ -698,6 +2379,38 @@
                     "defaultValue": "{\n  title: 'Example/Page',\n  component: PageComponent,\n  parameters: {\n    // More on how to position stories at: https://storybook.js.org/docs/configure/story-layout\n    layout: 'fullscreen',\n  },\n}"
                 }
             ],
+            "src/app/palette-table/palette-table.stories.ts": [
+                {
+                    "name": "meta",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/palette-table/palette-table.stories.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "Meta<PaletteTableComponent>",
+                    "defaultValue": "{\r\n  title: 'App/Palette Table',\r\n  component: PaletteTableComponent,\r\n  tags: ['autodocs'],\r\n  render: (args: PaletteTableComponent) => ({\r\n    props: {\r\n      ...args,\r\n    },\r\n  }),\r\n  argTypes: {\r\n    color: {\r\n      control: 'color',\r\n    },\r\n  },\r\n}"
+                },
+                {
+                    "name": "Populated",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/palette-table/palette-table.stories.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "Story",
+                    "defaultValue": "{\r\n  args: {\r\n    color: '#ff00ff',\r\n  },\r\n}"
+                },
+                {
+                    "name": "Typical",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/palette-table/palette-table.stories.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "Story",
+                    "defaultValue": "{\r\n  args: {},\r\n}"
+                }
+            ],
             ".storybook/preview.ts": [
                 {
                     "name": "preview",
@@ -714,6 +2427,43 @@
         "groupedFunctions": {},
         "groupedEnumerations": {},
         "groupedTypeAliases": {
+            "src/app/services/color-util.service.ts": [
+                {
+                    "name": "ColorCoordArray",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "[number, number, number]",
+                    "file": "src/app/services/color-util.service.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 189
+                },
+                {
+                    "name": "ColorPair",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "[string, string]",
+                    "file": "src/app/services/color-util.service.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 189
+                }
+            ],
+            "src/app/services/color-metrics.service.ts": [
+                {
+                    "name": "ContrastType",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "\"apca\" | \"bpca\"",
+                    "file": "src/app/services/color-metrics.service.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 192
+                }
+            ],
             "src/stories/button.stories.ts": [
                 {
                     "name": "Story",
@@ -752,12 +2502,49 @@
                     "description": "",
                     "kind": 183
                 }
+            ],
+            "src/app/palette-table/palette-table.stories.ts": [
+                {
+                    "name": "Story",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "StoryObj<PaletteTableComponent>",
+                    "file": "src/app/palette-table/palette-table.stories.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 183
+                }
+            ],
+            "src/app/palette-table/palette-table.component.ts": [
+                {
+                    "name": "TableData",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "Array<TableRow>",
+                    "file": "src/app/palette-table/palette-table.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 183
+                },
+                {
+                    "name": "TableRow",
+                    "ctype": "miscellaneous",
+                    "subtype": "typealias",
+                    "rawtype": "Array<TableColorCell>",
+                    "file": "src/app/palette-table/palette-table.component.ts",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "description": "",
+                    "kind": 183
+                }
             ]
         }
     },
     "routes": [],
     "coverage": {
-        "count": 4,
+        "count": 2,
         "status": "low",
         "files": [
             {
@@ -787,6 +2574,117 @@
                 "name": "appConfig",
                 "coveragePercent": 0,
                 "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/palette-table/palette-table.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "PaletteTableComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/14",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/palette-table/palette-table.component.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "TableColorCell",
+                "coveragePercent": 0,
+                "coverageCount": "0/8",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/palette-table/palette-table.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "meta",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/palette-table/palette-table.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Populated",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/palette-table/palette-table.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Typical",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/bpca.service.ts",
+                "type": "injectable",
+                "linktype": "injectable",
+                "name": "BpcaService",
+                "coveragePercent": 0,
+                "coverageCount": "0/7",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-metrics.service.ts",
+                "type": "injectable",
+                "linktype": "injectable",
+                "name": "ColorMetricsService",
+                "coveragePercent": 0,
+                "coverageCount": "0/9",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-metrics.service.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "NumberKeyLookup",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-util.service.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "ChromaMatchObject",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-util.service.ts",
+                "type": "injectable",
+                "linktype": "injectable",
+                "name": "ColorUtilService",
+                "coveragePercent": 0,
+                "coverageCount": "0/17",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-util.service.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "ColorMetaObj",
+                "coveragePercent": 0,
+                "coverageCount": "0/5",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/color-util.service.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "MinMaxLightObject",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
                 "status": "low"
             },
             {

@@ -1,5 +1,6 @@
 <div class="comp-container">
-  <table *ngIf="dataStruct" [style.backgroundColor]="color">
+  @if (dataStruct) {
+  <table [style.backgroundColor]="color">
     <caption class="sr-only">
       Collection of colors sharing the same hue organized by chroma as columns,
       and lightness as rows. Selecting a button in the table will copy the its
@@ -9,13 +10,19 @@
       <tr class="sr-only">
         <!-- <tr> -->
         <td>&nbsp;</td>
-        <th *ngFor="let header of tableHeaders">{{ header.toFixed(5) }}</th>
+
+        @for (header of tableHeaders; track $index) {
+        <th>{{ header.toFixed(5) }}</th>
+        }
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of dataStruct; index as i">
+      @for (row of dataStruct; track i; let i = $index) {
+      <tr>
         <th class="sr-only">{{ row[0]["lightness"].toFixed(5) }}</th>
-        <td *ngFor="let cell of row; index as j">
+
+        @for (cell of row; track j; let j = $index) {
+        <td>
           <div>
             <button
               [disabled]="!cell.color"
@@ -25,18 +32,19 @@
               [style.backgroundColor]="cell.deltaE === 0 ? 'black' : 'auto'"
               (click)="selectColor(i, j)"
             >
-              <span *ngIf="cell.color" class="sr-only">{{ cell.color }}, </span>
-              <span *ngIf="cell.color" class="sr-only"
-                >{{ cell.deltaLightness }}%,
-              </span>
-              <span *ngIf="cell.color" class="sr-only"
-                >{{ cell.deltaChroma }}%,
-              </span>
-              <span *ngIf="cell.color" class="sr-only">{{ cell.deltaE }}</span>
+              @if (cell.color) {
+              <span class="sr-only">{{ cell.color }}, </span>
+              <span class="sr-only">{{ cell.deltaLightness }}%, </span>
+              <span class="sr-only">{{ cell.deltaChroma }}%, </span>
+              <span class="sr-only">{{ cell.deltaE }}</span>
+              }
             </button>
           </div>
         </td>
+        }
       </tr>
+      }
     </tbody>
   </table>
+  }
 </div>

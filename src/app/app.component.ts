@@ -48,7 +48,7 @@ export class AppComponent {
   constantChroma: boolean = true;
   showGradient: boolean = true;
 
-  currentAlertMessage: AlertMessagObj | null = null;
+  currentAlertMessage: AlertMessagObj = new AlertMessagObj();
 
   handleColorInputInput(inputNumber: 'One' | 'Two', event: string) {
     if (inputNumber === 'One') {

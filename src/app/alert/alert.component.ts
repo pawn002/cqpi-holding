@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Output, input, effect } from '@angular/core';
 import { random, times } from 'lodash';
 
-export interface AlertMessagObj {
-  message: string;
+export class AlertMessagObj {
+  message: string = '';
 }
 
 @Component({
@@ -13,7 +13,7 @@ export interface AlertMessagObj {
 })
 export class AlertComponent {
   // Following line is the Component's input using signals.
-  alertMessage = input.required<AlertMessagObj | null>();
+  alertMessage = input<AlertMessagObj>();
 
   @Output() alertClosed = new EventEmitter<boolean>();
 
@@ -37,9 +37,9 @@ export class AlertComponent {
 
   constructor() {
     effect(() => {
-      const message = this.alertMessage();
+      const messagePresent = this.alertMessage()?.message;
 
-      if (message) {
+      if (messagePresent) {
         this.uniqId = this.generateRandomString(12);
 
         this.showAlert = true;

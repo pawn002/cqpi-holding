@@ -2,12 +2,10 @@
   <div class="alert-content">
     @if (showAlert){
     <p>{{ alertMessage()?.message }}</p>
-    <p class="msg-id">Message ID: {{ uniqId }}</p>
-    <!-- <button (click)="hideAlert()"><span>Dismiss</span></button> -->
 
+    <p class="msg-id">Message ID: {{ uniqId }}</p>
+
+    <!-- <button (click)="hideAlert()"><span>Dismiss</span></button> -->
     }
-    <!-- <ng-container
-    >
-    </ng-container> -->
   </div>
 </div>

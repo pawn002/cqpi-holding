@@ -3,12 +3,12 @@
     "interfaces": [
         {
             "name": "AlertMessagObj",
-            "id": "interface-AlertMessagObj-c396919eb01b8bc80bc4c4f0bf178432d6c7ea340b76b4dde65cb5f9ee7aa67b2b04fc7850dd533e96c91e891898251c0029efe8d9d8ded953f15bb43c2de906",
+            "id": "interface-AlertMessagObj-cdb329222a8080adf986a50be0647ac772ed7ef12c7f269903868495190f685d352c2aa4a8ae07fc959fbbe714fda10d15184140203fc0b9bf6f101b9b7fb31c",
             "file": "src/app/alert/alert.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "interface",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "message",
@@ -150,12 +150,12 @@
         },
         {
             "name": "ResetObject",
-            "id": "interface-ResetObject-da92cd2d5471ee64e02b030b713b2923ac19c5f35b9f35bdaa02f1ce350518930d48f3dfcddc0509f4c172d50ebebbb790098f7ffff939fd2e7249559a104a8a",
+            "id": "interface-ResetObject-0e1daaba4d10af641c4b0c380c7edc80bc39f420f296f495351a49f65044d4956c8a9596afdc6f4d343e7eef26147c37b9464d2c27d9fa2ee1c21e899cfc59e3",
             "file": "src/app/color-slider/color-slider.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "interface",
-            "sourceCode": "import {\r\n  Component,\r\n  Input,\r\n  OnChanges,\r\n  OnInit,\r\n  Output,\r\n  EventEmitter,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport interface ResetObject {\r\n  reset: true;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-slider',\r\n  templateUrl: './color-slider.component.html',\r\n  styleUrls: ['./color-slider.component.scss'],\r\n})\r\nexport class ColorSliderComponent implements OnInit, OnChanges {\r\n  @Input() id: string | 'slider-0' = 'slider-0';\r\n  @Input() name: string | 'color-slider' = 'color-slider';\r\n  @Input() color: string | null = null;\r\n  @Input() constantChroma: boolean = false;\r\n  @Input() showGradient: boolean = false;\r\n  @Input() resetSlider: ResetObject | null = null;\r\n  @Output() colorVariant = new EventEmitter<string | null>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  debug: boolean = false;\r\n  devColorVariant: string | null = null;\r\n\r\n  slideInterval: number | null = null;\r\n  slideMin: number | null = null;\r\n  slideMax: number | null = null;\r\n  initValue: number | null = null;\r\n  value: number | null = null;\r\n\r\n  getInitValue() {\r\n    return this.initValue;\r\n  }\r\n\r\n  sendInitialLightVariant() {\r\n    // Good UX to just send the input color?\r\n    this.colorVariant.emit(this.color);\r\n\r\n    if (this.debug) {\r\n      this.devColorVariant = this.color;\r\n    }\r\n  }\r\n\r\n  async getAndSetLightnessRange(\r\n    color: string,\r\n    options?: { constantChroma: boolean }\r\n  ) {\r\n    const rangeObject = await this.cus.getMinMaxLight(color);\r\n\r\n    if (rangeObject) {\r\n      this.sendInitialLightVariant();\r\n\r\n      this.slideMin = 0;\r\n      this.slideMax = 1;\r\n\r\n      if (options?.constantChroma) {\r\n        this.slideMin = rangeObject.lightMin;\r\n\r\n        this.slideMax = rangeObject.lightMax;\r\n      }\r\n\r\n      this.slideInterval = (this.slideMax - this.slideMin) / 80;\r\n\r\n      const lightnessIndex = 0;\r\n      const initialSlideValue = rangeObject.originalCoords[lightnessIndex];\r\n\r\n      this.initValue = initialSlideValue;\r\n\r\n      this.value = initialSlideValue;\r\n\r\n      this.redefineGradientStops(this.slideMin, this.slideMax);\r\n    } else {\r\n      console.error(`no range object for slider`);\r\n    }\r\n  }\r\n\r\n  handleSliding(event: Event) {\r\n    const inputElem = event.target as HTMLInputElement;\r\n\r\n    if (inputElem) {\r\n      const lightValue = parseFloat(inputElem.value);\r\n\r\n      if (this.color) {\r\n        const lightnessVariant = this.cus.createSrgbColor(\r\n          this.color,\r\n          lightValue\r\n        );\r\n\r\n        if (this.debug) {\r\n          console.log(`slide modding ${this.color} to ${lightnessVariant}`);\r\n\r\n          this.devColorVariant = lightnessVariant;\r\n        }\r\n\r\n        this.colorVariant.emit(lightnessVariant);\r\n      } else {\r\n        console.error(`no color specified`);\r\n      }\r\n    }\r\n  }\r\n\r\n  reset() {\r\n    // TODO: Isn't there an angular way to do this?\r\n    const element = document.getElementById(this.id) as HTMLInputElement;\r\n\r\n    if (this.initValue) {\r\n      element.value = this.initValue.toString();\r\n    } else {\r\n      console.error(`trouble resetting slider`);\r\n    }\r\n  }\r\n\r\n  gradient(val: 'on' | 'off') {\r\n    // TODO: Anguar way to do this?\r\n    const targetElem = document.getElementById(`cc-${this.id}`) as HTMLElement;\r\n\r\n    if (targetElem) {\r\n      if (val === 'on') {\r\n        targetElem.style.background = 'var(--gradient-background)';\r\n      }\r\n\r\n      if (val === 'off') {\r\n        targetElem.style.background = 'var(--default-background)';\r\n      }\r\n    } else {\r\n      console.warn(`no elem to assign gradient to.`);\r\n    }\r\n  }\r\n\r\n  redefineVariable(\r\n    element: HTMLElement,\r\n    variableName: string,\r\n    newValue: string\r\n  ) {\r\n    element.style.setProperty(variableName, newValue);\r\n  }\r\n\r\n  redefineGradientStops(lightMin: number, lightMax: number) {\r\n    if (this.color) {\r\n      const targetElement = document.getElementById(\r\n        `cc-${this.id}`\r\n      ) as HTMLElement;\r\n\r\n      const stops = [\r\n        '--grad-stop-0',\r\n        '--grad-stop-1',\r\n        '--grad-stop-2',\r\n        '--grad-stop-3',\r\n        '--grad-stop-4',\r\n        '--grad-stop-5',\r\n      ];\r\n\r\n      // get new stop values\r\n      const stopInterval = (lightMax - lightMin) / (stops.length - 1);\r\n      const stopVals = [];\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetLight = stopInterval * i + lightMin;\r\n        targetLight;\r\n\r\n        const stopColor = this.cus.createSrgbColor(this.color, targetLight);\r\n\r\n        stopVals.push(stopColor);\r\n      }\r\n\r\n      // assign new stop values\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetStop = stops[i];\r\n        const targetStopVal = stopVals[i];\r\n\r\n        if (targetStopVal) {\r\n          this.redefineVariable(targetElement, targetStop, targetStopVal);\r\n        } else {\r\n          console.log(`no new val to assign`);\r\n        }\r\n      }\r\n    } else {\r\n      console.log(`no color specified`);\r\n    }\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.color) {\r\n      this.getAndSetLightnessRange(this.color, {\r\n        constantChroma: this.constantChroma,\r\n      });\r\n    } else {\r\n      console.warn(`no color specified to comp`);\r\n    }\r\n\r\n    if (this.showGradient) {\r\n      this.gradient('on');\r\n    }\r\n\r\n    if (!this.showGradient) {\r\n      this.gradient('off');\r\n    }\r\n\r\n    if (this.resetSlider) {\r\n      this.reset();\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  Input,\r\n  OnChanges,\r\n  OnInit,\r\n  Output,\r\n  EventEmitter,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport { CommonModule } from '@angular/common';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport interface ResetObject {\r\n  reset: true;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-slider',\r\n  templateUrl: './color-slider.component.html',\r\n  styleUrls: ['./color-slider.component.scss'],\r\n  imports: [CommonModule],\r\n  standalone: true,\r\n})\r\nexport class ColorSliderComponent implements OnInit, OnChanges {\r\n  @Input() id: string | 'slider-0' = 'slider-0';\r\n  @Input() name: string | 'color-slider' = 'color-slider';\r\n  @Input() color: string | null = null;\r\n  @Input() constantChroma: boolean = false;\r\n  @Input() showGradient: boolean = false;\r\n  @Input() resetSlider: ResetObject | null = null;\r\n  @Output() colorVariant = new EventEmitter<string | null>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  debug: boolean = false;\r\n  devColorVariant: string | null = null;\r\n\r\n  slideInterval: number | null = null;\r\n  slideMin: number | null = null;\r\n  slideMax: number | null = null;\r\n  initValue: number | null = null;\r\n  value: number | null = null;\r\n\r\n  getInitValue() {\r\n    return this.initValue;\r\n  }\r\n\r\n  sendInitialLightVariant() {\r\n    // Good UX to just send the input color?\r\n    this.colorVariant.emit(this.color);\r\n\r\n    if (this.debug) {\r\n      this.devColorVariant = this.color;\r\n    }\r\n  }\r\n\r\n  async getAndSetLightnessRange(\r\n    color: string,\r\n    options?: { constantChroma: boolean }\r\n  ) {\r\n    const rangeObject = await this.cus.getMinMaxLight(color);\r\n\r\n    if (rangeObject) {\r\n      this.sendInitialLightVariant();\r\n\r\n      this.slideMin = 0;\r\n      this.slideMax = 1;\r\n\r\n      if (options?.constantChroma) {\r\n        this.slideMin = rangeObject.lightMin;\r\n\r\n        this.slideMax = rangeObject.lightMax;\r\n      }\r\n\r\n      this.slideInterval = (this.slideMax - this.slideMin) / 80;\r\n\r\n      const lightnessIndex = 0;\r\n      const initialSlideValue = rangeObject.originalCoords[lightnessIndex];\r\n\r\n      this.initValue = initialSlideValue;\r\n\r\n      this.value = initialSlideValue;\r\n\r\n      this.redefineGradientStops(this.slideMin, this.slideMax);\r\n    } else {\r\n      console.error(`no range object for slider`);\r\n    }\r\n  }\r\n\r\n  handleSliding(event: Event) {\r\n    const inputElem = event.target as HTMLInputElement;\r\n\r\n    if (inputElem) {\r\n      const lightValue = parseFloat(inputElem.value);\r\n\r\n      if (this.color) {\r\n        const lightnessVariant = this.cus.createSrgbColor(\r\n          this.color,\r\n          lightValue\r\n        );\r\n\r\n        if (this.debug) {\r\n          console.log(`slide modding ${this.color} to ${lightnessVariant}`);\r\n\r\n          this.devColorVariant = lightnessVariant;\r\n        }\r\n\r\n        this.colorVariant.emit(lightnessVariant);\r\n      } else {\r\n        console.error(`no color specified`);\r\n      }\r\n    }\r\n  }\r\n\r\n  reset() {\r\n    // TODO: Isn't there an angular way to do this?\r\n    const element = document.getElementById(this.id) as HTMLInputElement;\r\n\r\n    if (this.initValue) {\r\n      element.value = this.initValue.toString();\r\n    } else {\r\n      console.error(`trouble resetting slider`);\r\n    }\r\n  }\r\n\r\n  gradient(val: 'on' | 'off') {\r\n    // TODO: Anguar way to do this?\r\n    const targetElem = document.getElementById(`cc-${this.id}`) as HTMLElement;\r\n\r\n    if (targetElem) {\r\n      if (val === 'on') {\r\n        targetElem.style.background = 'var(--gradient-background)';\r\n      }\r\n\r\n      if (val === 'off') {\r\n        targetElem.style.background = 'var(--default-background)';\r\n      }\r\n    } else {\r\n      console.warn(`no elem to assign gradient to.`);\r\n    }\r\n  }\r\n\r\n  redefineVariable(\r\n    element: HTMLElement,\r\n    variableName: string,\r\n    newValue: string\r\n  ) {\r\n    element.style.setProperty(variableName, newValue);\r\n  }\r\n\r\n  redefineGradientStops(lightMin: number, lightMax: number) {\r\n    if (this.color) {\r\n      const targetElement = document.getElementById(\r\n        `cc-${this.id}`\r\n      ) as HTMLElement;\r\n\r\n      const stops = [\r\n        '--grad-stop-0',\r\n        '--grad-stop-1',\r\n        '--grad-stop-2',\r\n        '--grad-stop-3',\r\n        '--grad-stop-4',\r\n        '--grad-stop-5',\r\n      ];\r\n\r\n      // get new stop values\r\n      const stopInterval = (lightMax - lightMin) / (stops.length - 1);\r\n      const stopVals = [];\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetLight = stopInterval * i + lightMin;\r\n        targetLight;\r\n\r\n        const stopColor = this.cus.createSrgbColor(this.color, targetLight);\r\n\r\n        stopVals.push(stopColor);\r\n      }\r\n\r\n      // assign new stop values\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetStop = stops[i];\r\n        const targetStopVal = stopVals[i];\r\n\r\n        if (targetStopVal) {\r\n          this.redefineVariable(targetElement, targetStop, targetStopVal);\r\n        } else {\r\n          console.log(`no new val to assign`);\r\n        }\r\n      }\r\n    } else {\r\n      console.log(`no color specified`);\r\n    }\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.color) {\r\n      this.getAndSetLightnessRange(this.color, {\r\n        constantChroma: this.constantChroma,\r\n      });\r\n    } else {\r\n      console.warn(`no color specified to comp`);\r\n    }\r\n\r\n    if (this.showGradient) {\r\n      this.gradient('on');\r\n    }\r\n\r\n    if (!this.showGradient) {\r\n      this.gradient('off');\r\n    }\r\n\r\n    if (this.resetSlider) {\r\n      this.reset();\r\n    }\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "reset",
@@ -164,7 +164,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 14
+                    "line": 15
                 }
             ],
             "indexSignatures": [],
@@ -1325,12 +1325,12 @@
         },
         {
             "name": "ContrastObject",
-            "id": "class-ContrastObject-f9c7fe76bd549f0542490592b217ce0f56b1f0b0323cd405c0b02ed3a3e99934f4da45734b1af2a5c853a57e5784570cfcf0e5a9d3089fc3c888479a45798334",
+            "id": "class-ContrastObject-ea5fcea7de7b6c8b068c49b45059094df00af0f115eed7e440dca99bfbf8598c30c711f17cf68a38a13a83d09a34342cc1bb9720cd496fd75afe9cf96b20de75",
             "file": "src/app/color-contrast/color-contrast.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "class",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport {\r\n  ColorMetricsService,\r\n  ContrastType,\r\n} from '../services/color-metrics.service';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class ContrastObject {\r\n  score: number | null = null;\r\n  type: ContrastType | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-contrast',\r\n  templateUrl: './color-contrast.component.html',\r\n  styleUrls: ['./color-contrast.component.scss'],\r\n})\r\nexport class ColorContrastComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n  @Input() contrastType: ContrastType | 'apca object' | null = null;\r\n\r\n  @Output() contrast = new EventEmitter<ContrastObject>();\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  contrastScore: number | null = null;\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(changes);\r\n\r\n    if (this.colorOne && this.colorTwo && this.contrastType) {\r\n      const score = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        this.contrastType === 'apca object' ? 'apca' : this.contrastType\r\n      );\r\n\r\n      this.contrastScore = score;\r\n\r\n      if (score) {\r\n        this.contrastScore =\r\n          this.contrastType === 'apca object'\r\n            ? this.cus.getMinObjectDimension(score)\r\n            : this.contrastScore;\r\n      }\r\n    } else {\r\n      console.warn('contrast comp has incomplete bindings');\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport {\r\n  ColorMetricsService,\r\n  ContrastType,\r\n} from '../services/color-metrics.service';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class ContrastObject {\r\n  score: number | null = null;\r\n  type: ContrastType | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-contrast',\r\n  templateUrl: './color-contrast.component.html',\r\n  styleUrls: ['./color-contrast.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class ColorContrastComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n  @Input() contrastType: ContrastType | 'apca object' | null = null;\r\n\r\n  @Output() contrast = new EventEmitter<ContrastObject>();\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  contrastScore: number | null = null;\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(changes);\r\n\r\n    if (this.colorOne && this.colorTwo && this.contrastType) {\r\n      const score = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        this.contrastType === 'apca object' ? 'apca' : this.contrastType\r\n      );\r\n\r\n      this.contrastScore = score;\r\n\r\n      if (score) {\r\n        this.contrastScore =\r\n          this.contrastType === 'apca object'\r\n            ? this.cus.getMinObjectDimension(score)\r\n            : this.contrastScore;\r\n      }\r\n    } else {\r\n      console.warn('contrast comp has incomplete bindings');\r\n    }\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "score",
@@ -1363,12 +1363,12 @@
         },
         {
             "name": "CopyToClipboardEvent",
-            "id": "class-CopyToClipboardEvent-52c36e75568442b09fb7bb1de50799964d009abcf096115c2a20195a8b5d38085dd55c11ed393401f70016b466e623dd9ed67e9ba69846a727d520a7caef93d8",
+            "id": "class-CopyToClipboardEvent-419056953d28dea5bfae8ad8c18913755927f22ca97662c0042dbb06193323f890b247be2d0c134f02cd468653c7325e124b216c46ea458f797973dd29bfc31d",
             "file": "src/app/copy-to-clipboard-button/copy-to-clipboard-button.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "class",
-            "sourceCode": "import { Component, Input, Output, EventEmitter } from '@angular/core';\r\n\r\nexport class CopyToClipboardEvent {\r\n  copied: boolean = false;\r\n  color: string | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-copy-to-clipboard-button',\r\n  templateUrl: './copy-to-clipboard-button.component.html',\r\n  styleUrls: ['./copy-to-clipboard-button.component.scss'],\r\n})\r\nexport class CopyToClipboardButtonComponent {\r\n  @Input() color: string | null = null;\r\n  @Output() copyEvent = new EventEmitter<CopyToClipboardEvent>();\r\n\r\n  async copyToClipboard(): Promise<void> {\r\n    if (this.color) {\r\n      const colorSansHex = this.color.replace('#', '');\r\n\r\n      try {\r\n        await navigator.clipboard.writeText(colorSansHex);\r\n\r\n        this.copyEvent.emit({\r\n          copied: true,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        // console.log(this.color, 'copied to clipboard');\r\n      } catch (err) {\r\n        this.copyEvent.emit({\r\n          copied: false,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        console.error('Failed to copy text: ', err);\r\n      }\r\n    } else {\r\n      console.error('nothing to copy');\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, Input, Output, EventEmitter } from '@angular/core';\r\n\r\nexport class CopyToClipboardEvent {\r\n  copied: boolean = false;\r\n  color: string | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-copy-to-clipboard-button',\r\n  templateUrl: './copy-to-clipboard-button.component.html',\r\n  styleUrls: ['./copy-to-clipboard-button.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class CopyToClipboardButtonComponent {\r\n  @Input() color: string | null = null;\r\n  @Output() copyEvent = new EventEmitter<CopyToClipboardEvent>();\r\n\r\n  async copyToClipboard(): Promise<void> {\r\n    if (this.color) {\r\n      const colorSansHex = this.color.replace('#', '');\r\n\r\n      try {\r\n        await navigator.clipboard.writeText(colorSansHex);\r\n\r\n        this.copyEvent.emit({\r\n          copied: true,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        // console.log(this.color, 'copied to clipboard');\r\n      } catch (err) {\r\n        this.copyEvent.emit({\r\n          copied: false,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        console.error('Failed to copy text: ', err);\r\n      }\r\n    } else {\r\n      console.error('nothing to copy');\r\n    }\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "color",
@@ -1401,12 +1401,12 @@
         },
         {
             "name": "DifferencesDataObj",
-            "id": "class-DifferencesDataObj-aa1ba1bdde20bb0c865c882e229ec13032bfbcfbea14c4fb9cdb489d20deff612b70b87fad344a7b0e2172e9cbdeb6719bdfbf35cf57ac0ead591273e7bfa441",
+            "id": "class-DifferencesDataObj-e5ef3d4ca16359eb762da342e7ff9532d279385bbaa74bd516eccff0439fdc830eed2522c8c82f071620fa601268b7b90b2411e8fe5518f507eeca4328172653",
             "file": "src/app/metadata/metadata.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "class",
-            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "apca",
@@ -1459,12 +1459,12 @@
         },
         {
             "name": "SuccessesObj",
-            "id": "class-SuccessesObj-aa1ba1bdde20bb0c865c882e229ec13032bfbcfbea14c4fb9cdb489d20deff612b70b87fad344a7b0e2172e9cbdeb6719bdfbf35cf57ac0ead591273e7bfa441",
+            "id": "class-SuccessesObj-e5ef3d4ca16359eb762da342e7ff9532d279385bbaa74bd516eccff0439fdc830eed2522c8c82f071620fa601268b7b90b2411e8fe5518f507eeca4328172653",
             "file": "src/app/metadata/metadata.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "class",
-            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "largeText",
@@ -1507,12 +1507,12 @@
         },
         {
             "name": "TableColorCell",
-            "id": "class-TableColorCell-a6a03c6206bf595143b3f7d21afab4f4df5d1d3aec6a6711345b00465fe507259162381cca5ed1840bd3c06962c2a46de601b511dba7461cb565c3f09045777c",
+            "id": "class-TableColorCell-30c9ccde20d791ae5d800c21dd5719c14f9d84147637a9213c9d619ea3dc7d39f35fb25baf94be1f669434629bb2ae936e94c8e932b77840a6d63a24e13207bc",
             "file": "src/app/palette-table/palette-table.component.ts",
             "deprecated": false,
             "deprecationMessage": "",
             "type": "class",
-            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
             "properties": [
                 {
                     "name": "chroma",
@@ -1598,7 +1598,7 @@
     "components": [
         {
             "name": "AlertComponent",
-            "id": "component-AlertComponent-c396919eb01b8bc80bc4c4f0bf178432d6c7ea340b76b4dde65cb5f9ee7aa67b2b04fc7850dd533e96c91e891898251c0029efe8d9d8ded953f15bb43c2de906",
+            "id": "component-AlertComponent-cdb329222a8080adf986a50be0647ac772ed7ef12c7f269903868495190f685d352c2aa4a8ae07fc959fbbe714fda10d15184140203fc0b9bf6f101b9b7fb31c",
             "file": "src/app/alert/alert.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -1621,7 +1621,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 22,
+                    "line": 23,
                     "type": "AlertMessagObj | null",
                     "decorators": []
                 }
@@ -1632,7 +1632,7 @@
                     "defaultValue": "new EventEmitter<boolean>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 23,
+                    "line": 24,
                     "type": "EventEmitter"
                 }
             ],
@@ -1645,7 +1645,7 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 25
+                    "line": 26
                 },
                 {
                     "name": "timeout",
@@ -1655,7 +1655,7 @@
                     "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 29
+                    "line": 30
                 },
                 {
                     "name": "uniqId",
@@ -1665,7 +1665,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 27
+                    "line": 28
                 }
             ],
             "methodsClass": [
@@ -1682,7 +1682,7 @@
                     "optional": false,
                     "returnType": "any",
                     "typeParameters": [],
-                    "line": 31,
+                    "line": 32,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -1703,7 +1703,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 35,
+                    "line": 36,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -1720,7 +1720,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 43,
+                    "line": 44,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -1741,7 +1741,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 57,
+                    "line": 58,
                     "deprecated": false,
                     "deprecationMessage": ""
                 }
@@ -1750,12 +1750,12 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -1769,11 +1769,11 @@
                 "OnInit",
                 "OnChanges"
             ],
-            "templateData": "<div class=\"comp-container\" role=\"alert\">\r\n  <div class=\"alert-content\">\r\n    <ng-container *ngIf=\"showAlert\">\r\n      <p [innerText]=\"alertMessage?.message\"></p>\r\n      <p class=\"msg-id\">Message ID: {{ uniqId }}</p>\r\n      <!-- <button (click)=\"hideAlert()\"><span>Dismiss</span></button> -->\r\n    </ng-container>\r\n  </div>\r\n</div>\r\n"
+            "templateData": "<div class=\"comp-container\" role=\"alert\">\r\n  <div class=\"alert-content\">\r\n    @if (showAlert){\r\n    <p [innerText]=\"alertMessage?.message\"></p>\r\n    <p class=\"msg-id\">Message ID: {{ uniqId }}</p>\r\n    <!-- <button (click)=\"hideAlert()\"><span>Dismiss</span></button> -->\r\n\r\n    }\r\n    <!-- <ng-container\r\n    >\r\n    </ng-container> -->\r\n  </div>\r\n</div>\r\n"
         },
         {
             "name": "AppComponent",
-            "id": "component-AppComponent-6b2bd7e6c7d38bf35d5f1e0fbe2a223507fae3354ad7d83772adedb34a824239a8ebf0abfd5c8faa939310ca7db42b88f2d0d0bceaa05db04d3fab751f179e80",
+            "id": "component-AppComponent-3ce07a85dce9e6d3d247a167353fa96f8ff981f39258a464f34716fc8cb7ffbd3e0d1c8245572129986d695d3a585f51aa82eef46694ffbaac63658c2d1418d7",
             "file": "src/app/app.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -1792,17 +1792,463 @@
             "outputsClass": [],
             "propertiesClass": [
                 {
-                    "name": "title",
-                    "defaultValue": "'cpqi-holding'",
+                    "name": "colorPickerOneComparedColor",
+                    "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "type": "string",
+                    "type": "string | null",
                     "optional": false,
                     "description": "",
-                    "line": 12
+                    "line": 39
+                },
+                {
+                    "name": "colorPickerOneSelectedColor",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 38
+                },
+                {
+                    "name": "colorPickerTwoComparedColor",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 42
+                },
+                {
+                    "name": "colorPickerTwoSelectedColor",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 41
+                },
+                {
+                    "name": "constantChroma",
+                    "defaultValue": "true",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 48
+                },
+                {
+                    "name": "contrastType",
+                    "defaultValue": "'apca'",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ContrastType | \"apca object\"",
+                    "optional": false,
+                    "description": "",
+                    "line": 44
+                },
+                {
+                    "name": "currentAlertMessage",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "AlertMessagObj | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 51
+                },
+                {
+                    "name": "cus",
+                    "defaultValue": "inject(ColorUtilService)",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 36
+                },
+                {
+                    "name": "resetSlider",
+                    "defaultValue": "null",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "ResetObject | null",
+                    "optional": false,
+                    "description": "",
+                    "line": 46
+                },
+                {
+                    "name": "showGradient",
+                    "defaultValue": "true",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 49
                 }
             ],
-            "methodsClass": [],
+            "methodsClass": [
+                {
+                    "name": "alertUser",
+                    "args": [
+                        {
+                            "name": "message",
+                            "type": "AlertMessagObj",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 210,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "message",
+                            "type": "AlertMessagObj",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "handleColorInputInput",
+                    "args": [
+                        {
+                            "name": "inputNumber",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "event",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 53,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "inputNumber",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "event",
+                            "type": "string",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "handleColorPaletteButtonEvent",
+                    "args": [
+                        {
+                            "name": "paletteChartNum",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "event",
+                            "type": "TableColorCell",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 81,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "paletteChartNum",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "event",
+                            "type": "TableColorCell",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "handleCopyEvent",
+                    "args": [
+                        {
+                            "name": "event",
+                            "type": "CopyToClipboardEvent",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 73,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "event",
+                            "type": "CopyToClipboardEvent",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "handleSliderInputInput",
+                    "args": [
+                        {
+                            "name": "inputNumber",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        },
+                        {
+                            "name": "event",
+                            "type": "string | null",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 63,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "inputNumber",
+                            "type": "\"One\" | \"Two\"",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "event",
+                            "type": "string | null",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "matchChromas",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "any",
+                    "typeParameters": [],
+                    "line": 186,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ]
+                },
+                {
+                    "name": "ngAfterViewInit",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 216,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "ngOnInit",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 214,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "radioChange",
+                    "args": [
+                        {
+                            "name": "changeTo",
+                            "type": "ContrastType | \"apca object\"",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 98,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "changeTo",
+                            "type": "ContrastType | \"apca object\"",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "resetSliders",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 180,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "setRandomColorPair",
+                    "args": [
+                        {
+                            "name": "initialAppColors",
+                            "type": "boolean",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "optional": true
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "any",
+                    "typeParameters": [],
+                    "line": 161,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "modifierKind": [
+                        134
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "initialAppColors",
+                            "type": "boolean",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "optional": true,
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "swapColors",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 119,
+                    "deprecated": false,
+                    "deprecationMessage": ""
+                },
+                {
+                    "name": "toggleConstantChroma",
+                    "args": [
+                        {
+                            "name": "event",
+                            "type": "Event",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 103,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "event",
+                            "type": "Event",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "toggleShowGradient",
+                    "args": [
+                        {
+                            "name": "event",
+                            "type": "Event",
+                            "deprecated": false,
+                            "deprecationMessage": ""
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 112,
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "jsdoctags": [
+                        {
+                            "name": "event",
+                            "type": "Event",
+                            "deprecated": false,
+                            "deprecationMessage": "",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
             "deprecated": false,
             "deprecationMessage": "",
             "hostBindings": [],
@@ -1811,18 +2257,46 @@
             "imports": [
                 {
                     "name": "RouterOutlet"
+                },
+                {
+                    "name": "AlertComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "ColorContrastComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "ColorPickerComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "ColorSliderComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "CopyToClipboardButtonComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "MetadataComponent",
+                    "type": "component"
+                },
+                {
+                    "name": "PaletteTableComponent",
+                    "type": "component"
                 }
             ],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\n\r\n@Component({\r\n  selector: 'app-root',\r\n  standalone: true,\r\n  imports: [RouterOutlet],\r\n  templateUrl: './app.component.html',\r\n  styleUrl: './app.component.scss'\r\n})\r\nexport class AppComponent {\r\n  title = 'cpqi-holding';\r\n}\r\n",
+            "sourceCode": "import { Component, inject } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\n\r\nimport { ContrastType } from './services/color-metrics.service';\r\nimport { ColorUtilService } from './services/color-util.service';\r\nimport { CopyToClipboardEvent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { ResetObject } from './color-slider/color-slider.component';\r\nimport { AlertMessagObj } from './alert/alert.component';\r\nimport { TableColorCell } from './palette-table/palette-table.component';\r\n\r\nimport { AlertComponent } from './alert/alert.component';\r\nimport { ColorContrastComponent } from './color-contrast/color-contrast.component';\r\nimport { ColorPickerComponent } from './color-picker/color-picker.component';\r\nimport { ColorSliderComponent } from './color-slider/color-slider.component';\r\nimport { CopyToClipboardButtonComponent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { MetadataComponent } from './metadata/metadata.component';\r\nimport { PaletteTableComponent } from './palette-table/palette-table.component';\r\n\r\n@Component({\r\n  selector: 'app-root',\r\n  standalone: true,\r\n  imports: [\r\n    RouterOutlet,\r\n    AlertComponent,\r\n    ColorContrastComponent,\r\n    ColorPickerComponent,\r\n    ColorSliderComponent,\r\n    CopyToClipboardButtonComponent,\r\n    MetadataComponent,\r\n    PaletteTableComponent,\r\n  ],\r\n  templateUrl: './app.component.html',\r\n  styleUrl: './app.component.scss',\r\n})\r\nexport class AppComponent {\r\n  cus = inject(ColorUtilService);\r\n\r\n  colorPickerOneSelectedColor: string | null = null;\r\n  colorPickerOneComparedColor: string | null = null;\r\n\r\n  colorPickerTwoSelectedColor: string | null = null;\r\n  colorPickerTwoComparedColor: string | null = null;\r\n\r\n  contrastType: ContrastType | 'apca object' = 'apca';\r\n\r\n  resetSlider: ResetObject | null = null;\r\n\r\n  constantChroma: boolean = true;\r\n  showGradient: boolean = true;\r\n\r\n  currentAlertMessage: AlertMessagObj | null = null;\r\n\r\n  handleColorInputInput(inputNumber: 'One' | 'Two', event: string) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneSelectedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event;\r\n    }\r\n  }\r\n\r\n  handleSliderInputInput(inputNumber: 'One' | 'Two', event: string | null) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneComparedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoComparedColor = event;\r\n    }\r\n  }\r\n\r\n  handleCopyEvent(event: CopyToClipboardEvent) {\r\n    if (event.copied) {\r\n      this.alertUser({ message: `${event.color} copied to clipboard.` });\r\n    } else {\r\n      console.error(`color copy error.`);\r\n    }\r\n  }\r\n\r\n  handleColorPaletteButtonEvent(\r\n    paletteChartNum: 'One' | 'Two',\r\n    event: TableColorCell\r\n  ) {\r\n    if (paletteChartNum === 'One') {\r\n      this.colorPickerOneSelectedColor = event.color;\r\n    }\r\n\r\n    if (paletteChartNum === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event.color;\r\n    }\r\n\r\n    this.alertUser({\r\n      message: `Color picker ${paletteChartNum} changed to ${event.color}`,\r\n    });\r\n  }\r\n\r\n  radioChange(changeTo: ContrastType | 'apca object') {\r\n    console.log(changeTo);\r\n    this.contrastType = changeTo;\r\n  }\r\n\r\n  toggleConstantChroma(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.constantChroma = checked ? true : false;\r\n\r\n    this.resetSliders();\r\n  }\r\n\r\n  toggleShowGradient(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.showGradient = checked ? true : false;\r\n  }\r\n\r\n  swapColors() {\r\n    const getColor = (type: 'fg' | 'bg'): string | null => {\r\n      let color: string | null = null;\r\n\r\n      switch (type) {\r\n        case 'fg':\r\n          color = this.colorPickerOneSelectedColor;\r\n\r\n          break;\r\n        case 'bg':\r\n          color = this.colorPickerTwoSelectedColor;\r\n\r\n          break;\r\n\r\n        default:\r\n          break;\r\n      }\r\n\r\n      return color;\r\n    };\r\n\r\n    const oldPairing = {\r\n      foreground: getColor('fg'),\r\n      background: getColor('bg'),\r\n    };\r\n\r\n    const newPairing = {\r\n      foreground: oldPairing.background,\r\n      background: oldPairing.foreground,\r\n    };\r\n\r\n    if (newPairing.foreground && newPairing.background) {\r\n      this.colorPickerOneSelectedColor = newPairing.foreground;\r\n\r\n      this.colorPickerTwoSelectedColor = newPairing.background;\r\n\r\n      this.alertUser({ message: 'Swapped foreground and background colors.' });\r\n    } else {\r\n      console.error('swapping colors went badly. . .');\r\n    }\r\n  }\r\n\r\n  async setRandomColorPair(initialAppColors?: boolean) {\r\n    const initColorPair = await this.cus.getRandomColorPair();\r\n\r\n    const randomColorPair = await this.cus.adjustColorPairForPresentation(\r\n      initColorPair\r\n    );\r\n\r\n    setTimeout(() => {\r\n      this.colorPickerOneSelectedColor = randomColorPair[0];\r\n      this.colorPickerTwoSelectedColor = randomColorPair[1];\r\n\r\n      if (!initialAppColors) {\r\n        this.alertUser({\r\n          message: `Random color pair generated: ${randomColorPair[0]}, and ${randomColorPair[1]}`,\r\n        });\r\n      }\r\n    }, 0);\r\n  }\r\n\r\n  resetSliders() {\r\n    this.resetSlider = { reset: true };\r\n\r\n    this.alertUser({ message: 'Resetted color sliders to initial states.' });\r\n  }\r\n\r\n  async matchChromas() {\r\n    if (this.colorPickerOneSelectedColor && this.colorPickerTwoSelectedColor) {\r\n      const matchedColors = await this.cus.matchChromas([\r\n        this.colorPickerOneSelectedColor,\r\n        this.colorPickerTwoSelectedColor,\r\n      ]);\r\n\r\n      if (\r\n        matchedColors.success &&\r\n        matchedColors.colors &&\r\n        matchedColors.chroma\r\n      ) {\r\n        this.colorPickerOneSelectedColor = matchedColors.colors[0];\r\n        this.colorPickerTwoSelectedColor = matchedColors.colors[1];\r\n\r\n        this.alertUser({\r\n          message: `Chroma matched foreground and background colors.`,\r\n        });\r\n      } else {\r\n        this.alertUser({ message: 'Unable to match  chroma across colors.' });\r\n      }\r\n    }\r\n  }\r\n\r\n  alertUser(message: AlertMessagObj) {\r\n    this.currentAlertMessage = message;\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngAfterViewInit(): void {\r\n    this.setRandomColorPair(true);\r\n  }\r\n}\r\n",
             "styleUrl": "./app.component.scss",
             "assetsDirs": [],
             "styleUrlsData": "",
             "stylesData": "",
             "extends": [],
-            "templateData": "<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->\r\n<!-- * * * * * * * to get started with your project! * * * * * * * -->\r\n<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n\r\n<style>\r\n  :host {\r\n    --bright-blue: oklch(51.01% 0.274 263.83);\r\n    --electric-violet: oklch(53.18% 0.28 296.97);\r\n    --french-violet: oklch(47.66% 0.246 305.88);\r\n    --vivid-pink: oklch(69.02% 0.277 332.77);\r\n    --hot-red: oklch(61.42% 0.238 15.34);\r\n    --orange-red: oklch(63.32% 0.24 31.68);\r\n\r\n    --gray-900: oklch(19.37% 0.006 300.98);\r\n    --gray-700: oklch(36.98% 0.014 302.71);\r\n    --gray-400: oklch(70.9% 0.015 304.04);\r\n\r\n    --red-to-pink-to-purple-vertical-gradient: linear-gradient(\r\n      180deg,\r\n      var(--orange-red) 0%,\r\n      var(--vivid-pink) 50%,\r\n      var(--electric-violet) 100%\r\n    );\r\n\r\n    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(\r\n      90deg,\r\n      var(--orange-red) 0%,\r\n      var(--vivid-pink) 50%,\r\n      var(--electric-violet) 100%\r\n    );\r\n\r\n    --pill-accent: var(--bright-blue);\r\n\r\n    font-family: \"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto,\r\n      Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\",\r\n      \"Segoe UI Symbol\";\r\n    box-sizing: border-box;\r\n    -webkit-font-smoothing: antialiased;\r\n    -moz-osx-font-smoothing: grayscale;\r\n  }\r\n\r\n  h1 {\r\n    font-size: 3.125rem;\r\n    color: var(--gray-900);\r\n    font-weight: 500;\r\n    line-height: 100%;\r\n    letter-spacing: -0.125rem;\r\n    margin: 0;\r\n    font-family: \"Inter Tight\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto,\r\n      Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\",\r\n      \"Segoe UI Symbol\";\r\n  }\r\n\r\n  p {\r\n    margin: 0;\r\n    color: var(--gray-700);\r\n  }\r\n\r\n  main {\r\n    width: 100%;\r\n    min-height: 100%;\r\n    display: flex;\r\n    justify-content: center;\r\n    align-items: center;\r\n    padding: 1rem;\r\n    box-sizing: inherit;\r\n    position: relative;\r\n  }\r\n\r\n  .angular-logo {\r\n    max-width: 9.2rem;\r\n  }\r\n\r\n  .content {\r\n    display: flex;\r\n    justify-content: space-around;\r\n    width: 100%;\r\n    max-width: 700px;\r\n    margin-bottom: 3rem;\r\n  }\r\n\r\n  .content h1 {\r\n    margin-top: 1.75rem;\r\n  }\r\n\r\n  .content p {\r\n    margin-top: 1.5rem;\r\n  }\r\n\r\n  .divider {\r\n    width: 1px;\r\n    background: var(--red-to-pink-to-purple-vertical-gradient);\r\n    margin-inline: 0.5rem;\r\n  }\r\n\r\n  .pill-group {\r\n    display: flex;\r\n    flex-direction: column;\r\n    align-items: start;\r\n    flex-wrap: wrap;\r\n    gap: 1.25rem;\r\n  }\r\n\r\n  .pill {\r\n    display: flex;\r\n    align-items: center;\r\n    --pill-accent: var(--bright-blue);\r\n    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);\r\n    color: var(--pill-accent);\r\n    padding-inline: 0.75rem;\r\n    padding-block: 0.375rem;\r\n    border-radius: 2.75rem;\r\n    border: 0;\r\n    transition: background 0.3s ease;\r\n    font-family: var(--inter-font);\r\n    font-size: 0.875rem;\r\n    font-style: normal;\r\n    font-weight: 500;\r\n    line-height: 1.4rem;\r\n    letter-spacing: -0.00875rem;\r\n    text-decoration: none;\r\n  }\r\n\r\n  .pill:hover {\r\n    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);\r\n  }\r\n\r\n  .pill-group .pill:nth-child(6n + 1) {\r\n    --pill-accent: var(--bright-blue);\r\n  }\r\n  .pill-group .pill:nth-child(6n + 2) {\r\n    --pill-accent: var(--french-violet);\r\n  }\r\n  .pill-group .pill:nth-child(6n + 3),\r\n  .pill-group .pill:nth-child(6n + 4),\r\n  .pill-group .pill:nth-child(6n + 5) {\r\n    --pill-accent: var(--hot-red);\r\n  }\r\n\r\n  .pill-group svg {\r\n    margin-inline-start: 0.25rem;\r\n  }\r\n\r\n  .social-links {\r\n    display: flex;\r\n    align-items: center;\r\n    gap: 0.73rem;\r\n    margin-top: 1.5rem;\r\n  }\r\n\r\n  .social-links path {\r\n    transition: fill 0.3s ease;\r\n    fill: var(--gray-400);\r\n  }\r\n\r\n  .social-links a:hover svg path {\r\n    fill: var(--gray-900);\r\n  }\r\n\r\n  @media screen and (max-width: 650px) {\r\n    .content {\r\n      flex-direction: column;\r\n      width: max-content;\r\n    }\r\n\r\n    .divider {\r\n      height: 1px;\r\n      width: 100%;\r\n      background: var(--red-to-pink-to-purple-horizontal-gradient);\r\n      margin-block: 1.5rem;\r\n    }\r\n  }\r\n</style>\r\n\r\n<main class=\"main\">\r\n  <div class=\"content\">\r\n    <div class=\"left-side\">\r\n      <svg\r\n        xmlns=\"http://www.w3.org/2000/svg\"\r\n        viewBox=\"0 0 982 239\"\r\n        fill=\"none\"\r\n        class=\"angular-logo\"\r\n      >\r\n        <g clip-path=\"url(#a)\">\r\n          <path\r\n            fill=\"url(#b)\"\r\n            d=\"M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z\"\r\n          />\r\n          <path\r\n            fill=\"url(#c)\"\r\n            d=\"M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z\"\r\n          />\r\n        </g>\r\n        <defs>\r\n          <radialGradient\r\n            id=\"c\"\r\n            cx=\"0\"\r\n            cy=\"0\"\r\n            r=\"1\"\r\n            gradientTransform=\"rotate(118.122 171.182 60.81) scale(205.794)\"\r\n            gradientUnits=\"userSpaceOnUse\"\r\n          >\r\n            <stop stop-color=\"#FF41F8\" />\r\n            <stop offset=\".707\" stop-color=\"#FF41F8\" stop-opacity=\".5\" />\r\n            <stop offset=\"1\" stop-color=\"#FF41F8\" stop-opacity=\"0\" />\r\n          </radialGradient>\r\n          <linearGradient\r\n            id=\"b\"\r\n            x1=\"0\"\r\n            x2=\"982\"\r\n            y1=\"192\"\r\n            y2=\"192\"\r\n            gradientUnits=\"userSpaceOnUse\"\r\n          >\r\n            <stop stop-color=\"#F0060B\" />\r\n            <stop offset=\"0\" stop-color=\"#F0070C\" />\r\n            <stop offset=\".526\" stop-color=\"#CC26D5\" />\r\n            <stop offset=\"1\" stop-color=\"#7702FF\" />\r\n          </linearGradient>\r\n          <clipPath id=\"a\"><path fill=\"#fff\" d=\"M0 0h982v239H0z\" /></clipPath>\r\n        </defs>\r\n      </svg>\r\n      <h1>Hello, {{ title }}</h1>\r\n      <p>Congratulations! Your app is running. 🎉</p>\r\n    </div>\r\n    <div class=\"divider\" role=\"separator\" aria-label=\"Divider\"></div>\r\n    <div class=\"right-side\">\r\n      <div class=\"pill-group\">\r\n        @for (item of [\r\n          { title: 'Explore the Docs', link: 'https://angular.dev' },\r\n          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },\r\n          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },\r\n          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },\r\n          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },\r\n        ]; track item.title) {\r\n          <a\r\n            class=\"pill\"\r\n            [href]=\"item.link\"\r\n            target=\"_blank\"\r\n            rel=\"noopener\"\r\n          >\r\n            <span>{{ item.title }}</span>\r\n            <svg\r\n              xmlns=\"http://www.w3.org/2000/svg\"\r\n              height=\"14\"\r\n              viewBox=\"0 -960 960 960\"\r\n              width=\"14\"\r\n              fill=\"currentColor\"\r\n            >\r\n              <path\r\n                d=\"M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z\"\r\n              />\r\n            </svg>\r\n          </a>\r\n        }\r\n      </div>\r\n      <div class=\"social-links\">\r\n        <a\r\n          href=\"https://github.com/angular/angular\"\r\n          aria-label=\"Github\"\r\n          target=\"_blank\"\r\n          rel=\"noopener\"\r\n        >\r\n          <svg\r\n            width=\"25\"\r\n            height=\"24\"\r\n            viewBox=\"0 0 25 24\"\r\n            fill=\"none\"\r\n            xmlns=\"http://www.w3.org/2000/svg\"\r\n            alt=\"Github\"\r\n          >\r\n            <path\r\n              d=\"M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z\"\r\n            />\r\n          </svg>\r\n        </a>\r\n        <a\r\n          href=\"https://twitter.com/angular\"\r\n          aria-label=\"Twitter\"\r\n          target=\"_blank\"\r\n          rel=\"noopener\"\r\n        >\r\n          <svg\r\n            width=\"24\"\r\n            height=\"24\"\r\n            viewBox=\"0 0 24 24\"\r\n            fill=\"none\"\r\n            xmlns=\"http://www.w3.org/2000/svg\"\r\n            alt=\"Twitter\"\r\n          >\r\n            <path\r\n              d=\"M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z\"\r\n            />\r\n          </svg>\r\n        </a>\r\n        <a\r\n          href=\"https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw\"\r\n          aria-label=\"Youtube\"\r\n          target=\"_blank\"\r\n          rel=\"noopener\"\r\n        >\r\n          <svg\r\n            width=\"29\"\r\n            height=\"20\"\r\n            viewBox=\"0 0 29 20\"\r\n            fill=\"none\"\r\n            xmlns=\"http://www.w3.org/2000/svg\"\r\n            alt=\"Youtube\"\r\n          >\r\n            <path\r\n              fill-rule=\"evenodd\"\r\n              clip-rule=\"evenodd\"\r\n              d=\"M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z\"\r\n            />\r\n          </svg>\r\n        </a>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</main>\r\n\r\n<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->\r\n<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r\n\r\n\r\n<router-outlet />\r\n"
+            "templateData": "<div class=\"app-container\">\r\n  <section class=\"title-and-sliders\">\r\n    <div class=\"title-and-score\">\r\n      <h1>Colors Contrast</h1>\r\n      <app-color-contrast\r\n        [colorOne]=\"colorPickerOneComparedColor\"\r\n        [colorTwo]=\"colorPickerTwoComparedColor\"\r\n        [contrastType]=\"contrastType\"\r\n      ></app-color-contrast>\r\n    </div>\r\n\r\n    <details class=\"app-instruction-start\">\r\n      <summary>How to use this app.</summary>\r\n\r\n      <p>\r\n        <span class=\"visual-header\">Quick Start:</span>\r\n        Input a Foreground and Background Color using the color inputs in the\r\n        next section. You can then us the slider inputs, and Copy to Clipboard\r\n        buttons to:\r\n      </p>\r\n      <ul>\r\n        <li>\r\n          Change the tone of your colors to achieve your desired combination of\r\n          contrast and tone.\r\n        </li>\r\n\r\n        <li>Copy each color to the clipboard for use in other applications.</li>\r\n      </ul>\r\n\r\n      <p>\r\n        <a href=\"#additional-instructions\"\r\n          >Screen reader–specific workflows, low vision user notes, and more\r\n          in-depth instructions.</a\r\n        >\r\n      </p>\r\n    </details>\r\n\r\n    <hr class=\"instructions-hr\" />\r\n\r\n    <h2 class=\"sr-only\">Main Color Controls</h2>\r\n\r\n    <h3>Foreground Color</h3>\r\n\r\n    <div class=\"slide-group\">\r\n      <app-color-picker\r\n        [inputId]=\"'cp-0'\"\r\n        [inputName]=\"'Foreground Color'\"\r\n        [comparedColor]=\"colorPickerOneComparedColor\"\r\n        (selectedColor)=\"handleColorInputInput('One', $event)\"\r\n        [deltaColor]=\"colorPickerOneSelectedColor\"\r\n      ></app-color-picker>\r\n      <app-color-slider\r\n        [id]=\"'slider-0'\"\r\n        [name]=\"'Foreground Slider'\"\r\n        [color]=\"colorPickerOneSelectedColor\"\r\n        [constantChroma]=\"constantChroma\"\r\n        (colorVariant)=\"handleSliderInputInput('One', $event)\"\r\n        [resetSlider]=\"resetSlider\"\r\n        [showGradient]=\"showGradient\"\r\n      ></app-color-slider>\r\n      <app-copy-to-clipboard-button\r\n        [color]=\"colorPickerOneComparedColor\"\r\n        (copyEvent)=\"handleCopyEvent($event)\"\r\n      ></app-copy-to-clipboard-button>\r\n    </div>\r\n\r\n    <details class=\"pallette-viz-container\">\r\n      <summary>Foreground LCH Limits</summary>\r\n\r\n      <div class=\"content\">\r\n        <app-palette-table\r\n          [color]=\"colorPickerOneSelectedColor\"\r\n          (selectedColor)=\"handleColorPaletteButtonEvent('One', $event)\"\r\n        ></app-palette-table>\r\n      </div>\r\n    </details>\r\n\r\n    <h3>Background Color</h3>\r\n\r\n    <div class=\"slide-group\">\r\n      <app-color-picker\r\n        [inputId]=\"'cp-1'\"\r\n        [inputName]=\"'Background Color'\"\r\n        [comparedColor]=\"colorPickerTwoComparedColor\"\r\n        [deltaColor]=\"colorPickerTwoSelectedColor\"\r\n        (selectedColor)=\"handleColorInputInput('Two', $event)\"\r\n      ></app-color-picker>\r\n      <app-color-slider\r\n        [id]=\"'slider-1'\"\r\n        [name]=\"'Backgroundground Slider'\"\r\n        [color]=\"colorPickerTwoSelectedColor\"\r\n        [constantChroma]=\"constantChroma\"\r\n        (colorVariant)=\"handleSliderInputInput('Two', $event)\"\r\n        [resetSlider]=\"resetSlider\"\r\n        [showGradient]=\"showGradient\"\r\n      ></app-color-slider>\r\n      <app-copy-to-clipboard-button\r\n        [color]=\"colorPickerTwoComparedColor\"\r\n        (copyEvent)=\"handleCopyEvent($event)\"\r\n      ></app-copy-to-clipboard-button>\r\n    </div>\r\n\r\n    <details class=\"pallette-viz-container\">\r\n      <summary>Background LCH Limits</summary>\r\n\r\n      <div class=\"content\">\r\n        <app-palette-table\r\n          [color]=\"colorPickerTwoSelectedColor\"\r\n          (selectedColor)=\"handleColorPaletteButtonEvent('Two', $event)\"\r\n        ></app-palette-table>\r\n      </div>\r\n    </details>\r\n  </section>\r\n\r\n  <section class=\"quick-actions\">\r\n    <button\r\n      (click)=\"swapColors()\"\r\n      [disabled]=\"!colorPickerOneSelectedColor || !colorPickerTwoSelectedColor\"\r\n    >\r\n      <span class=\"sr-only\">Swap Selected Colors</span>\r\n      <svg\r\n        class=\"swap-colors\"\r\n        aria-hidden=\"true\"\r\n        xmlns=\"http://www.w3.org/2000/svg\"\r\n        viewBox=\"0 0 32 32\"\r\n        x=\"0px\"\r\n        y=\"0px\"\r\n      >\r\n        <defs>\r\n          <style>\r\n            .cls-1 {\r\n              fill: none;\r\n            }\r\n          </style>\r\n        </defs>\r\n        <g>\r\n          <path\r\n            d=\"M6.29,8.71a1,1,0,0,1,0-1.42l4-4a1,1,0,1,1,1.42,1.42L9.41,7H19a7,7,0,0,1,7,7,1,1,0,0,1-2,0,5,5,0,0,0-5-5H9.41l2.3,2.29a1,1,0,0,1,0,1.42,1,1,0,0,1-1.42,0ZM21.71,19.29a1,1,0,0,0-1.42,1.42L22.59,23H13a5,5,0,0,1-5-5,1,1,0,0,0-2,0,7,7,0,0,0,7,7h9.59l-2.3,2.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0l4-4a1,1,0,0,0,0-1.42Z\"\r\n          />\r\n          <rect class=\"cls-1\" width=\"32\" height=\"32\" />\r\n        </g>\r\n      </svg>\r\n    </button>\r\n\r\n    <button (click)=\"matchChromas()\">\r\n      <span class=\"sr-only\">Harmonize Color Pair To Same Chroma</span>\r\n      <svg\r\n        aria-hidden=\"true\"\r\n        xmlns=\"http://www.w3.org/2000/svg\"\r\n        xmlns:xlink=\"http://www.w3.org/1999/xlink\"\r\n        version=\"1.1\"\r\n        x=\"0px\"\r\n        y=\"0px\"\r\n        viewBox=\"0 0 64 64\"\r\n        enable-background=\"new 0 0 64 64\"\r\n        xml:space=\"preserve\"\r\n      >\r\n        <path\r\n          d=\"M43,39c1.66,0,3,1.34,3,3s-1.34,3-3,3H33c-1.66,0-3-1.34-3-3s1.34-3,3-3H43z\"\r\n        />\r\n        <path\r\n          d=\"M20,17v3h-3c-1.66,0-3,1.34-3,3s1.34,3,3,3h3v3c0,1.66,1.34,3,3,3s3-1.34,3-3v-3h3c1.66,0,3-1.34,3-3s-1.34-3-3-3h-3v-3  c0-1.66-1.34-3-3-3S20,15.34,20,17z M56,12v40c0,2.21-1.79,4-4,4H12c-2.21,0-4-1.79-4-4V12c0-2.21,1.79-4,4-4h40  C54.21,8,56,9.79,56,12z M50,50V14L14,50H50z\"\r\n        />\r\n      </svg>\r\n    </button>\r\n\r\n    <button (click)=\"resetSliders()\">\r\n      <span class=\"sr-only\">Reset Color Sliders</span>\r\n      <svg\r\n        class=\"reset-sliders\"\r\n        aria-hidden=\"true\"\r\n        xmlns=\"http://www.w3.org/2000/svg\"\r\n        viewBox=\"0 0 24 24\"\r\n        x=\"0px\"\r\n        y=\"0px\"\r\n      >\r\n        <path\r\n          d=\"M12,3A8.92277,8.92277,0,0,0,4.5,7.05823V5H3v5H8V8.5H5.38165A7.4775,7.4775,0,1,1,4.5,12H3a9,9,0,1,0,9-9Z\"\r\n        />\r\n      </svg>\r\n    </button>\r\n\r\n    <button (click)=\"setRandomColorPair()\">\r\n      <span class=\"sr-only\">Create Random Color Pair</span>\r\n      <svg\r\n        aria-hidden=\"true\"\r\n        xmlns=\"http://www.w3.org/2000/svg\"\r\n        xmlns:xlink=\"http://www.w3.org/1999/xlink\"\r\n        xml:space=\"preserve\"\r\n        version=\"1.1\"\r\n        style=\"\r\n          shape-rendering: geometricPrecision;\r\n          text-rendering: geometricPrecision;\r\n          image-rendering: optimizeQuality;\r\n        \"\r\n        viewBox=\"0 0 333 333\"\r\n        x=\"0px\"\r\n        y=\"0px\"\r\n        fill-rule=\"evenodd\"\r\n        clip-rule=\"evenodd\"\r\n      >\r\n        <defs>\r\n          <style type=\"text/css\">\r\n            .str0 {\r\n              stroke: var(--min-body-text-black);\r\n              stroke-width: 14;\r\n            }\r\n            .fil0 {\r\n              fill: none;\r\n            }\r\n            .fil1 {\r\n              fill: var(--min-body-text-black);\r\n            }\r\n          </style>\r\n        </defs>\r\n        <g>\r\n          <rect\r\n            class=\"fil0 str0\"\r\n            x=\"24\"\r\n            y=\"167\"\r\n            width=\"138\"\r\n            height=\"138\"\r\n            rx=\"26\"\r\n            ry=\"26\"\r\n          />\r\n          <g>\r\n            <g>\r\n              <circle class=\"fil1\" cx=\"118\" cy=\"199\" r=\"12\" />\r\n              <circle class=\"fil1\" cx=\"118\" cy=\"236\" r=\"12\" />\r\n              <circle class=\"fil1\" cx=\"118\" cy=\"272\" r=\"12\" />\r\n            </g>\r\n            <g>\r\n              <circle class=\"fil1\" cx=\"67\" cy=\"199\" r=\"12\" />\r\n              <circle class=\"fil1\" cx=\"67\" cy=\"236\" r=\"12\" />\r\n              <circle class=\"fil1\" cx=\"67\" cy=\"272\" r=\"12\" />\r\n            </g>\r\n          </g>\r\n          <rect\r\n            class=\"fil0 str0\"\r\n            transform=\"matrix(0.707107 -0.707107 0.707107 0.707107 125.466 115.35)\"\r\n            width=\"138\"\r\n            height=\"138\"\r\n            rx=\"26\"\r\n            ry=\"26\"\r\n          />\r\n          <circle\r\n            class=\"fil1\"\r\n            transform=\"matrix(0.876112 -0.876112 0.876112 0.876112 222.904 115.349)\"\r\n            r=\"10\"\r\n          />\r\n        </g>\r\n      </svg>\r\n    </button>\r\n  </section>\r\n\r\n  <hr />\r\n\r\n  <section class=\"options\">\r\n    <h2>Options</h2>\r\n\r\n    <div class=\"options\">\r\n      <details>\r\n        <summary>Change how Colors Contrast works.</summary>\r\n        <div>\r\n          <h3>Colors Contrast Value</h3>\r\n\r\n          <div class=\"radio-section\">\r\n            <div class=\"radio-group\">\r\n              <label for=\"ct-apca\"\r\n                >Perceptual<span class=\"sr-only\"\r\n                  >; this affects a visual element not percievable to\r\n                  screenreaders for good UX—same value is obtainable on Color\r\n                  Metadata section under Differences.</span\r\n                >\r\n              </label>\r\n              <input\r\n                type=\"radio\"\r\n                name=\"contrastType\"\r\n                id=\"ct-apca\"\r\n                (change)=\"radioChange('apca')\"\r\n                checked\r\n              />\r\n            </div>\r\n            <div class=\"radio-group\">\r\n              <label for=\"ct-bpca\"\r\n                >WCAG 2 compatible<span class=\"sr-only\"\r\n                  >; this affects a visual element not percievable to\r\n                  screenreaders for good UX—same value is obtainable on Color\r\n                  Metadata section under Differences.</span\r\n                >\r\n              </label>\r\n              <input\r\n                type=\"radio\"\r\n                name=\"contrastType\"\r\n                id=\"ct-bpca\"\r\n                (change)=\"radioChange('bpca')\"\r\n              />\r\n            </div>\r\n            <div class=\"radio-group\">\r\n              <label for=\"ct-apca-object\"\r\n                >Object\r\n                <span class=\"sr-only\"\r\n                  >; this affects a visual element not percievable to\r\n                  screenreaders for good UX—same value is obtainable on Color\r\n                  Metadata section under Differences.</span\r\n                >\r\n              </label>\r\n              <input\r\n                type=\"radio\"\r\n                name=\"contrastType\"\r\n                id=\"ct-apca-object\"\r\n                (change)=\"radioChange('apca object')\"\r\n              />\r\n            </div>\r\n          </div>\r\n        </div>\r\n\r\n        <div>\r\n          <h3>Color Sliders</h3>\r\n\r\n          <div class=\"checkbox-section\">\r\n            <div class=\"checkbox-group\">\r\n              <label for=\"option-const-chroma\">Constant chroma</label>\r\n              <input\r\n                checked\r\n                type=\"checkbox\"\r\n                name=\"Constant Chroma Toggle\"\r\n                id=\"option-const-chroma\"\r\n                (change)=\"toggleConstantChroma($event)\"\r\n              />\r\n            </div>\r\n            <div class=\"checkbox-group\">\r\n              <label for=\"option-show-grad\">Show Gradient</label>\r\n              <input\r\n                checked\r\n                type=\"checkbox\"\r\n                name=\"Show Gradient Toggle\"\r\n                id=\"option-show-grad\"\r\n                (change)=\"toggleShowGradient($event)\"\r\n              />\r\n            </div>\r\n          </div>\r\n        </div>\r\n      </details>\r\n    </div>\r\n  </section>\r\n\r\n  <hr />\r\n\r\n  <section class=\"metadata\">\r\n    <h2 id=\"color-metadata\">Color Metadata</h2>\r\n\r\n    <details>\r\n      <summary>Descriptive data about your inputted colors.</summary>\r\n\r\n      <app-metadata\r\n        [colorOne]=\"colorPickerOneComparedColor\"\r\n        [colorTwo]=\"colorPickerTwoComparedColor\"\r\n      ></app-metadata>\r\n    </details>\r\n  </section>\r\n\r\n  <hr />\r\n\r\n  <section class=\"instructions\">\r\n    <h2 id=\"additional-instructions\">Additional Instructions</h2>\r\n\r\n    <details>\r\n      <summary>Detailed instructions and workflows.</summary>\r\n\r\n      <div class=\"content\">\r\n        <p>\r\n          <span class=\"visual-header\">Screen Reader Users:</span> Input a\r\n          Foreground Color and a Background Color in the Main Color Controls\r\n          section. You can then:\r\n        </p>\r\n        <ol>\r\n          <li>\r\n            Adjust your inputted colors lighter and darker using the slider\r\n            inputs. . .\r\n          </li>\r\n          <li>\r\n            . . .while checking contrast and color descriptions in the\r\n            <a href=\"#color-metatdata\">Color Metadata</a> section.\r\n          </li>\r\n        </ol>\r\n\r\n        <p>\r\n          <span class=\"visual-header\">Low Vision Users:</span> We designed\r\n          Colors Contrast from the ground up with you in mind. You will notice\r\n          that zooming your browser still allows you to see the most important\r\n          parts of the UI:\r\n        </p>\r\n        <ul>\r\n          <li>The contrast value</li>\r\n          <li>The color inputs</li>\r\n          <li>The slider inputs</li>\r\n          <li>The Copy to Clipboard buttons</li>\r\n        </ul>\r\n\r\n        <p>\r\n          <span class=\"visual-header\"> Random Color Pairs:</span> Colors\r\n          Contrast starts you off with a random pair of colors that passes most\r\n          if not all levels of Accessible Contrast.\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            Use the slider inputs to create tones of those colors for each\r\n            contrast level you need.\r\n          </li>\r\n          <li>\r\n            Try swapping Foreground, and Background colors for a dark mode pair.\r\n          </li>\r\n        </ul>\r\n      </div>\r\n    </details>\r\n  </section>\r\n\r\n  <hr />\r\n\r\n  <section class=\"notes\">\r\n    <h2>Notes</h2>\r\n\r\n    <details>\r\n      <summary>Details about app features.</summary>\r\n\r\n      <div class=\"content\">\r\n        <p id=\"notes-lch-limits\">\r\n          <span class=\"visual-header\">LCH Limits:</span>\r\n          This feature displays variants of your selected color. Unlike most\r\n          color pickers, this feature only shows you what is in the sRGB color\r\n          gamut. This allows you to know:\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            How your choice of hue affects your options for lightness and color\r\n            strength. For example, strong yellows are only possible at high\r\n            lightness levels.\r\n          </li>\r\n          <li>\r\n            How lightness and color strength relate to each other for your\r\n            selected hue.\r\n          </li>\r\n        </ul>\r\n        <p>\r\n          This feature uses an HTML table element that should allow screen\r\n          reader users to:\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            Use column and row headers to examine and choose specific variants.\r\n          </li>\r\n          <li>Read various color metadata.</li>\r\n        </ul>\r\n\r\n        <p id=\"notes-object\">\r\n          <span class=\"visual-header\">Object:</span> This readout shows two\r\n          different values:\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            The first value is a number in pixels that the current contrast\r\n            level supports.\r\n          </li>\r\n          <li>\r\n            The second value is an exclamation point. This occurs when the\r\n            current contrast level is too low to support\r\n            <strong>ANY</strong> object.\r\n          </li>\r\n        </ul>\r\n\r\n        <p id=\"notes-perceptual-contrast\">\r\n          <span class=\"visual-header\"> Perceptual contrast:</span> This score\r\n          gauges inclusive contrast better than WCAG 2. For more information on\r\n          why, refer to Myndex article,\r\n          <a href=\"https://git.apcacontrast.com/documentation/WhyAPCA.html\"\r\n            >Why APCA?</a\r\n          >\r\n        </p>\r\n        <p id=\"notes-wcag2-compat\">\r\n          <span class=\"visual-header\">WCAG 2 compatible:</span> A score\r\n          compatible with use for WCAG 2.x success criteria. This score meets or\r\n          exceeds WCAG 2 scores to better include those with atypical vision.\r\n        </p>\r\n        <p id=\"notes-wcag2\">\r\n          <span class=\"visual-header\">WCAG 2:</span> This score is for reference\r\n          only—do not use this score for judging inclusive contrast.\r\n        </p>\r\n\r\n        <p id=\"notes-display-wcag2\">\r\n          <span class=\"visual-header\">Colors Contrast Value: Perceptual:</span>\r\n          The default score displayed by Colors Contrast. It ranges from -108 to\r\n          106. Use this value in conjunction with\r\n          <a href=\"http://https://www.myndex.com/APCA/\">Myndex guides</a> to\r\n          create inclusive designs.\r\n        </p>\r\n        <p id=\"notes-display-wcag2\">\r\n          <span class=\"visual-header\"\r\n            >Colors Contrast Value: WCAG 2 compatible:</span\r\n          >\r\n          This option swaps in a score for a value usable with WCAG 2.x success\r\n          criteria.\r\n        </p>\r\n        <p id=\"notes-display-wcag2\">\r\n          <span class=\"visual-header\">Colors Contrast Value: Object:</span>\r\n          This option swaps in a score that either displays a number in pixels\r\n          or an exclamation point (!). The number is the smallest object\r\n          dimension you can use the current color variant pair for.\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            Smallest object dimension is the smallest dimension of an object you\r\n            are designing.\r\n          </li>\r\n          <li>\r\n            For example, if an object is 15 pixels by 20 pixels, the smallest\r\n            dimension is 15 pixels.\r\n          </li>\r\n        </ul>\r\n\r\n        <p id=\"notes-constant-chroma\">\r\n          <span class=\"visual-header\">Constant chroma:</span>\r\n          This option forces input sliders to limit tones with the same chroma\r\n          and hue of your inputted color.\r\n        </p>\r\n        <ul>\r\n          <li>\r\n            Keeping the same chroma and hue preserves the identity of your input\r\n            color.\r\n          </li>\r\n          <li>\r\n            Deselecting this option allows you to generate more tones. Be aware\r\n            that a lot of tones generated will now clash with your inputted\r\n            color.\r\n          </li>\r\n        </ul>\r\n        <p id=\"notes-show-grad\">\r\n          <span class=\"visual-header\">Show Gradient:</span>\r\n          This option renders a tone gradient behind the slider inputs. The\r\n          gradient shows the tonal possibilities of your inputted color. If\r\n          Constant Chroma is not active, the gradient ranges from black to\r\n          white.\r\n        </p>\r\n      </div>\r\n    </details>\r\n  </section>\r\n\r\n  <hr />\r\n\r\n  <section class=\"contact\">\r\n    <h2>Contact Information and Feedback</h2>\r\n\r\n    <p>\r\n      Made by <a href=\"https://github.com/pawn002\">pawn002</a>, who would\r\n      appreciate\r\n      <a href=\"https://github.com/pawn002/color-pair-quick-iterator/issues\">\r\n        bug reports and feature requests for this app</a\r\n      >\r\n      to help improve its Accessibility.\r\n    </p>\r\n  </section>\r\n\r\n  <div class=\"alert\">\r\n    <app-alert [alertMessage]=\"currentAlertMessage\"></app-alert>\r\n  </div>\r\n</div>\r\n"
         },
         {
             "name": "ButtonComponent",
@@ -1959,7 +2433,7 @@
         },
         {
             "name": "ColorContrastComponent",
-            "id": "component-ColorContrastComponent-f9c7fe76bd549f0542490592b217ce0f56b1f0b0323cd405c0b02ed3a3e99934f4da45734b1af2a5c853a57e5784570cfcf0e5a9d3089fc3c888479a45798334",
+            "id": "component-ColorContrastComponent-ea5fcea7de7b6c8b068c49b45059094df00af0f115eed7e440dca99bfbf8598c30c711f17cf68a38a13a83d09a34342cc1bb9720cd496fd75afe9cf96b20de75",
             "file": "src/app/color-contrast/color-contrast.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -1982,7 +2456,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 27,
+                    "line": 28,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -1991,7 +2465,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 28,
+                    "line": 29,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -2000,7 +2474,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 29,
+                    "line": 30,
                     "type": "ContrastType | \"apca object\" | null",
                     "decorators": []
                 }
@@ -2011,7 +2485,7 @@
                     "defaultValue": "new EventEmitter<ContrastObject>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 31,
+                    "line": 32,
                     "type": "EventEmitter"
                 }
             ],
@@ -2024,7 +2498,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 34
+                    "line": 35
                 },
                 {
                     "name": "contrastScore",
@@ -2034,7 +2508,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 36
+                    "line": 37
                 },
                 {
                     "name": "cus",
@@ -2044,7 +2518,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 33
+                    "line": 34
                 }
             ],
             "methodsClass": [
@@ -2061,7 +2535,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 38,
+                    "line": 39,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2081,12 +2555,12 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport {\r\n  ColorMetricsService,\r\n  ContrastType,\r\n} from '../services/color-metrics.service';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class ContrastObject {\r\n  score: number | null = null;\r\n  type: ContrastType | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-contrast',\r\n  templateUrl: './color-contrast.component.html',\r\n  styleUrls: ['./color-contrast.component.scss'],\r\n})\r\nexport class ColorContrastComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n  @Input() contrastType: ContrastType | 'apca object' | null = null;\r\n\r\n  @Output() contrast = new EventEmitter<ContrastObject>();\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  contrastScore: number | null = null;\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(changes);\r\n\r\n    if (this.colorOne && this.colorTwo && this.contrastType) {\r\n      const score = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        this.contrastType === 'apca object' ? 'apca' : this.contrastType\r\n      );\r\n\r\n      this.contrastScore = score;\r\n\r\n      if (score) {\r\n        this.contrastScore =\r\n          this.contrastType === 'apca object'\r\n            ? this.cus.getMinObjectDimension(score)\r\n            : this.contrastScore;\r\n      }\r\n    } else {\r\n      console.warn('contrast comp has incomplete bindings');\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport {\r\n  ColorMetricsService,\r\n  ContrastType,\r\n} from '../services/color-metrics.service';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class ContrastObject {\r\n  score: number | null = null;\r\n  type: ContrastType | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-contrast',\r\n  templateUrl: './color-contrast.component.html',\r\n  styleUrls: ['./color-contrast.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class ColorContrastComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n  @Input() contrastType: ContrastType | 'apca object' | null = null;\r\n\r\n  @Output() contrast = new EventEmitter<ContrastObject>();\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  contrastScore: number | null = null;\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(changes);\r\n\r\n    if (this.colorOne && this.colorTwo && this.contrastType) {\r\n      const score = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        this.contrastType === 'apca object' ? 'apca' : this.contrastType\r\n      );\r\n\r\n      this.contrastScore = score;\r\n\r\n      if (score) {\r\n        this.contrastScore =\r\n          this.contrastType === 'apca object'\r\n            ? this.cus.getMinObjectDimension(score)\r\n            : this.contrastScore;\r\n      }\r\n    } else {\r\n      console.warn('contrast comp has incomplete bindings');\r\n    }\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -2103,7 +2577,7 @@
         },
         {
             "name": "ColorPickerComponent",
-            "id": "component-ColorPickerComponent-e729cc687abe596f53a2f60986fee33574acfb8d9ade8f3c332f889a742e4d9e1606de7e570c0ae0360d6fdc308e9f6ffb7e257211a434d8c7ae2623c29e197e",
+            "id": "component-ColorPickerComponent-168a8139d69aa3bc257b447cc220b33124c1005ac579b0e365a1a057306f995a9b10ca77bd501afb0d41e900d98236ded570bb3ac72fca72d0b0c6f5ed33e3bb",
             "file": "src/app/color-picker/color-picker.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -2126,7 +2600,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 18,
+                    "line": 19,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -2135,7 +2609,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 19,
+                    "line": 20,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -2144,7 +2618,7 @@
                     "defaultValue": "'fg-color'",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 16,
+                    "line": 17,
                     "type": "string",
                     "decorators": []
                 },
@@ -2153,7 +2627,7 @@
                     "defaultValue": "'foreground color'",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 17,
+                    "line": 18,
                     "type": "string",
                     "decorators": []
                 }
@@ -2164,7 +2638,7 @@
                     "defaultValue": "new EventEmitter<string>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 21,
+                    "line": 22,
                     "type": "EventEmitter"
                 }
             ],
@@ -2177,7 +2651,7 @@
                     "type": "string | null",
                     "optional": false,
                     "description": "",
-                    "line": 23
+                    "line": 24
                 }
             ],
             "methodsClass": [
@@ -2194,7 +2668,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 25,
+                    "line": 26,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2222,7 +2696,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 33,
+                    "line": 34,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2250,7 +2724,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 56,
+                    "line": 57,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2278,7 +2752,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 44,
+                    "line": 45,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2298,12 +2772,12 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n} from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-color-picker',\r\n  templateUrl: './color-picker.component.html',\r\n  styleUrls: ['./color-picker.component.scss'],\r\n})\r\nexport class ColorPickerComponent implements OnChanges {\r\n  @Input() inputId: string = 'fg-color';\r\n  @Input() inputName: string = 'foreground color';\r\n  @Input() comparedColor: string | null = null;\r\n  @Input() deltaColor?: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<string>();\r\n\r\n  color: string | null = null;\r\n\r\n  handleColorChange(inputColor: string) {\r\n    // update color\r\n    this.color = inputColor;\r\n\r\n    // send out color for use in other comps\r\n    this.selectedColor.emit(inputColor);\r\n  }\r\n\r\n  handleInputEvent(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n\r\n    const selectedColor = inputElement.value;\r\n\r\n    // reset compared color\r\n    this.comparedColor = 'transparent';\r\n\r\n    this.handleColorChange(selectedColor);\r\n  }\r\n\r\n  updateInputValue(color: string) {\r\n    const targetInput = document.getElementById(\r\n      this.inputId\r\n    ) as HTMLInputElement;\r\n\r\n    if (targetInput) {\r\n      targetInput.value = color;\r\n    } else {\r\n      console.error(`something went wrong in color picker comp.`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.deltaColor) {\r\n      this.handleColorChange(this.deltaColor);\r\n\r\n      this.updateInputValue(this.deltaColor);\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  OnChanges,\r\n  Output,\r\n  SimpleChanges,\r\n} from '@angular/core';\r\n\r\n@Component({\r\n  selector: 'app-color-picker',\r\n  templateUrl: './color-picker.component.html',\r\n  styleUrls: ['./color-picker.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class ColorPickerComponent implements OnChanges {\r\n  @Input() inputId: string = 'fg-color';\r\n  @Input() inputName: string = 'foreground color';\r\n  @Input() comparedColor: string | null = null;\r\n  @Input() deltaColor?: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<string>();\r\n\r\n  color: string | null = null;\r\n\r\n  handleColorChange(inputColor: string) {\r\n    // update color\r\n    this.color = inputColor;\r\n\r\n    // send out color for use in other comps\r\n    this.selectedColor.emit(inputColor);\r\n  }\r\n\r\n  handleInputEvent(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n\r\n    const selectedColor = inputElement.value;\r\n\r\n    // reset compared color\r\n    this.comparedColor = 'transparent';\r\n\r\n    this.handleColorChange(selectedColor);\r\n  }\r\n\r\n  updateInputValue(color: string) {\r\n    const targetInput = document.getElementById(\r\n      this.inputId\r\n    ) as HTMLInputElement;\r\n\r\n    if (targetInput) {\r\n      targetInput.value = color;\r\n    } else {\r\n      console.error(`something went wrong in color picker comp.`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.deltaColor) {\r\n      this.handleColorChange(this.deltaColor);\r\n\r\n      this.updateInputValue(this.deltaColor);\r\n    }\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -2320,7 +2794,7 @@
         },
         {
             "name": "ColorSliderComponent",
-            "id": "component-ColorSliderComponent-da92cd2d5471ee64e02b030b713b2923ac19c5f35b9f35bdaa02f1ce350518930d48f3dfcddc0509f4c172d50ebebbb790098f7ffff939fd2e7249559a104a8a",
+            "id": "component-ColorSliderComponent-0e1daaba4d10af641c4b0c380c7edc80bc39f420f296f495351a49f65044d4956c8a9596afdc6f4d343e7eef26147c37b9464d2c27d9fa2ee1c21e899cfc59e3",
             "file": "src/app/color-slider/color-slider.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -2343,7 +2817,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 25,
+                    "line": 28,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -2352,7 +2826,7 @@
                     "defaultValue": "false",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 26,
+                    "line": 29,
                     "type": "boolean",
                     "decorators": []
                 },
@@ -2361,7 +2835,7 @@
                     "defaultValue": "'slider-0'",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 23,
+                    "line": 26,
                     "type": "string | \"slider-0\"",
                     "decorators": []
                 },
@@ -2370,7 +2844,7 @@
                     "defaultValue": "'color-slider'",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 24,
+                    "line": 27,
                     "type": "string | \"color-slider\"",
                     "decorators": []
                 },
@@ -2379,7 +2853,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 28,
+                    "line": 31,
                     "type": "ResetObject | null",
                     "decorators": []
                 },
@@ -2388,7 +2862,7 @@
                     "defaultValue": "false",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 27,
+                    "line": 30,
                     "type": "boolean",
                     "decorators": []
                 }
@@ -2399,7 +2873,7 @@
                     "defaultValue": "new EventEmitter<string | null>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 29,
+                    "line": 32,
                     "type": "EventEmitter"
                 }
             ],
@@ -2412,7 +2886,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 31
+                    "line": 34
                 },
                 {
                     "name": "debug",
@@ -2422,7 +2896,7 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 33
+                    "line": 36
                 },
                 {
                     "name": "devColorVariant",
@@ -2432,7 +2906,7 @@
                     "type": "string | null",
                     "optional": false,
                     "description": "",
-                    "line": 34
+                    "line": 37
                 },
                 {
                     "name": "initValue",
@@ -2442,7 +2916,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 39
+                    "line": 42
                 },
                 {
                     "name": "slideInterval",
@@ -2452,7 +2926,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 36
+                    "line": 39
                 },
                 {
                     "name": "slideMax",
@@ -2462,7 +2936,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 38
+                    "line": 41
                 },
                 {
                     "name": "slideMin",
@@ -2472,7 +2946,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 37
+                    "line": 40
                 },
                 {
                     "name": "value",
@@ -2482,7 +2956,7 @@
                     "type": "number | null",
                     "optional": false,
                     "description": "",
-                    "line": 40
+                    "line": 43
                 }
             ],
             "methodsClass": [
@@ -2506,7 +2980,7 @@
                     "optional": false,
                     "returnType": "any",
                     "typeParameters": [],
-                    "line": 55,
+                    "line": 58,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "modifierKind": [
@@ -2540,7 +3014,7 @@
                     "optional": false,
                     "returnType": "number",
                     "typeParameters": [],
-                    "line": 42,
+                    "line": 45,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -2557,7 +3031,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 124,
+                    "line": 127,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2585,7 +3059,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 88,
+                    "line": 91,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2613,7 +3087,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 196,
+                    "line": 199,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2634,7 +3108,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 194,
+                    "line": 197,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -2657,7 +3131,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 149,
+                    "line": 152,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2706,7 +3180,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 141,
+                    "line": 144,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -2745,7 +3219,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 113,
+                    "line": 116,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -2755,7 +3229,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 46,
+                    "line": 49,
                     "deprecated": false,
                     "deprecationMessage": ""
                 }
@@ -2764,12 +3238,17 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
-            "imports": [],
+            "standalone": true,
+            "imports": [
+                {
+                    "name": "CommonModule",
+                    "type": "module"
+                }
+            ],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  Input,\r\n  OnChanges,\r\n  OnInit,\r\n  Output,\r\n  EventEmitter,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport interface ResetObject {\r\n  reset: true;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-slider',\r\n  templateUrl: './color-slider.component.html',\r\n  styleUrls: ['./color-slider.component.scss'],\r\n})\r\nexport class ColorSliderComponent implements OnInit, OnChanges {\r\n  @Input() id: string | 'slider-0' = 'slider-0';\r\n  @Input() name: string | 'color-slider' = 'color-slider';\r\n  @Input() color: string | null = null;\r\n  @Input() constantChroma: boolean = false;\r\n  @Input() showGradient: boolean = false;\r\n  @Input() resetSlider: ResetObject | null = null;\r\n  @Output() colorVariant = new EventEmitter<string | null>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  debug: boolean = false;\r\n  devColorVariant: string | null = null;\r\n\r\n  slideInterval: number | null = null;\r\n  slideMin: number | null = null;\r\n  slideMax: number | null = null;\r\n  initValue: number | null = null;\r\n  value: number | null = null;\r\n\r\n  getInitValue() {\r\n    return this.initValue;\r\n  }\r\n\r\n  sendInitialLightVariant() {\r\n    // Good UX to just send the input color?\r\n    this.colorVariant.emit(this.color);\r\n\r\n    if (this.debug) {\r\n      this.devColorVariant = this.color;\r\n    }\r\n  }\r\n\r\n  async getAndSetLightnessRange(\r\n    color: string,\r\n    options?: { constantChroma: boolean }\r\n  ) {\r\n    const rangeObject = await this.cus.getMinMaxLight(color);\r\n\r\n    if (rangeObject) {\r\n      this.sendInitialLightVariant();\r\n\r\n      this.slideMin = 0;\r\n      this.slideMax = 1;\r\n\r\n      if (options?.constantChroma) {\r\n        this.slideMin = rangeObject.lightMin;\r\n\r\n        this.slideMax = rangeObject.lightMax;\r\n      }\r\n\r\n      this.slideInterval = (this.slideMax - this.slideMin) / 80;\r\n\r\n      const lightnessIndex = 0;\r\n      const initialSlideValue = rangeObject.originalCoords[lightnessIndex];\r\n\r\n      this.initValue = initialSlideValue;\r\n\r\n      this.value = initialSlideValue;\r\n\r\n      this.redefineGradientStops(this.slideMin, this.slideMax);\r\n    } else {\r\n      console.error(`no range object for slider`);\r\n    }\r\n  }\r\n\r\n  handleSliding(event: Event) {\r\n    const inputElem = event.target as HTMLInputElement;\r\n\r\n    if (inputElem) {\r\n      const lightValue = parseFloat(inputElem.value);\r\n\r\n      if (this.color) {\r\n        const lightnessVariant = this.cus.createSrgbColor(\r\n          this.color,\r\n          lightValue\r\n        );\r\n\r\n        if (this.debug) {\r\n          console.log(`slide modding ${this.color} to ${lightnessVariant}`);\r\n\r\n          this.devColorVariant = lightnessVariant;\r\n        }\r\n\r\n        this.colorVariant.emit(lightnessVariant);\r\n      } else {\r\n        console.error(`no color specified`);\r\n      }\r\n    }\r\n  }\r\n\r\n  reset() {\r\n    // TODO: Isn't there an angular way to do this?\r\n    const element = document.getElementById(this.id) as HTMLInputElement;\r\n\r\n    if (this.initValue) {\r\n      element.value = this.initValue.toString();\r\n    } else {\r\n      console.error(`trouble resetting slider`);\r\n    }\r\n  }\r\n\r\n  gradient(val: 'on' | 'off') {\r\n    // TODO: Anguar way to do this?\r\n    const targetElem = document.getElementById(`cc-${this.id}`) as HTMLElement;\r\n\r\n    if (targetElem) {\r\n      if (val === 'on') {\r\n        targetElem.style.background = 'var(--gradient-background)';\r\n      }\r\n\r\n      if (val === 'off') {\r\n        targetElem.style.background = 'var(--default-background)';\r\n      }\r\n    } else {\r\n      console.warn(`no elem to assign gradient to.`);\r\n    }\r\n  }\r\n\r\n  redefineVariable(\r\n    element: HTMLElement,\r\n    variableName: string,\r\n    newValue: string\r\n  ) {\r\n    element.style.setProperty(variableName, newValue);\r\n  }\r\n\r\n  redefineGradientStops(lightMin: number, lightMax: number) {\r\n    if (this.color) {\r\n      const targetElement = document.getElementById(\r\n        `cc-${this.id}`\r\n      ) as HTMLElement;\r\n\r\n      const stops = [\r\n        '--grad-stop-0',\r\n        '--grad-stop-1',\r\n        '--grad-stop-2',\r\n        '--grad-stop-3',\r\n        '--grad-stop-4',\r\n        '--grad-stop-5',\r\n      ];\r\n\r\n      // get new stop values\r\n      const stopInterval = (lightMax - lightMin) / (stops.length - 1);\r\n      const stopVals = [];\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetLight = stopInterval * i + lightMin;\r\n        targetLight;\r\n\r\n        const stopColor = this.cus.createSrgbColor(this.color, targetLight);\r\n\r\n        stopVals.push(stopColor);\r\n      }\r\n\r\n      // assign new stop values\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetStop = stops[i];\r\n        const targetStopVal = stopVals[i];\r\n\r\n        if (targetStopVal) {\r\n          this.redefineVariable(targetElement, targetStop, targetStopVal);\r\n        } else {\r\n          console.log(`no new val to assign`);\r\n        }\r\n      }\r\n    } else {\r\n      console.log(`no color specified`);\r\n    }\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.color) {\r\n      this.getAndSetLightnessRange(this.color, {\r\n        constantChroma: this.constantChroma,\r\n      });\r\n    } else {\r\n      console.warn(`no color specified to comp`);\r\n    }\r\n\r\n    if (this.showGradient) {\r\n      this.gradient('on');\r\n    }\r\n\r\n    if (!this.showGradient) {\r\n      this.gradient('off');\r\n    }\r\n\r\n    if (this.resetSlider) {\r\n      this.reset();\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  Input,\r\n  OnChanges,\r\n  OnInit,\r\n  Output,\r\n  EventEmitter,\r\n  SimpleChanges,\r\n  inject,\r\n} from '@angular/core';\r\nimport { CommonModule } from '@angular/common';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport interface ResetObject {\r\n  reset: true;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-color-slider',\r\n  templateUrl: './color-slider.component.html',\r\n  styleUrls: ['./color-slider.component.scss'],\r\n  imports: [CommonModule],\r\n  standalone: true,\r\n})\r\nexport class ColorSliderComponent implements OnInit, OnChanges {\r\n  @Input() id: string | 'slider-0' = 'slider-0';\r\n  @Input() name: string | 'color-slider' = 'color-slider';\r\n  @Input() color: string | null = null;\r\n  @Input() constantChroma: boolean = false;\r\n  @Input() showGradient: boolean = false;\r\n  @Input() resetSlider: ResetObject | null = null;\r\n  @Output() colorVariant = new EventEmitter<string | null>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  debug: boolean = false;\r\n  devColorVariant: string | null = null;\r\n\r\n  slideInterval: number | null = null;\r\n  slideMin: number | null = null;\r\n  slideMax: number | null = null;\r\n  initValue: number | null = null;\r\n  value: number | null = null;\r\n\r\n  getInitValue() {\r\n    return this.initValue;\r\n  }\r\n\r\n  sendInitialLightVariant() {\r\n    // Good UX to just send the input color?\r\n    this.colorVariant.emit(this.color);\r\n\r\n    if (this.debug) {\r\n      this.devColorVariant = this.color;\r\n    }\r\n  }\r\n\r\n  async getAndSetLightnessRange(\r\n    color: string,\r\n    options?: { constantChroma: boolean }\r\n  ) {\r\n    const rangeObject = await this.cus.getMinMaxLight(color);\r\n\r\n    if (rangeObject) {\r\n      this.sendInitialLightVariant();\r\n\r\n      this.slideMin = 0;\r\n      this.slideMax = 1;\r\n\r\n      if (options?.constantChroma) {\r\n        this.slideMin = rangeObject.lightMin;\r\n\r\n        this.slideMax = rangeObject.lightMax;\r\n      }\r\n\r\n      this.slideInterval = (this.slideMax - this.slideMin) / 80;\r\n\r\n      const lightnessIndex = 0;\r\n      const initialSlideValue = rangeObject.originalCoords[lightnessIndex];\r\n\r\n      this.initValue = initialSlideValue;\r\n\r\n      this.value = initialSlideValue;\r\n\r\n      this.redefineGradientStops(this.slideMin, this.slideMax);\r\n    } else {\r\n      console.error(`no range object for slider`);\r\n    }\r\n  }\r\n\r\n  handleSliding(event: Event) {\r\n    const inputElem = event.target as HTMLInputElement;\r\n\r\n    if (inputElem) {\r\n      const lightValue = parseFloat(inputElem.value);\r\n\r\n      if (this.color) {\r\n        const lightnessVariant = this.cus.createSrgbColor(\r\n          this.color,\r\n          lightValue\r\n        );\r\n\r\n        if (this.debug) {\r\n          console.log(`slide modding ${this.color} to ${lightnessVariant}`);\r\n\r\n          this.devColorVariant = lightnessVariant;\r\n        }\r\n\r\n        this.colorVariant.emit(lightnessVariant);\r\n      } else {\r\n        console.error(`no color specified`);\r\n      }\r\n    }\r\n  }\r\n\r\n  reset() {\r\n    // TODO: Isn't there an angular way to do this?\r\n    const element = document.getElementById(this.id) as HTMLInputElement;\r\n\r\n    if (this.initValue) {\r\n      element.value = this.initValue.toString();\r\n    } else {\r\n      console.error(`trouble resetting slider`);\r\n    }\r\n  }\r\n\r\n  gradient(val: 'on' | 'off') {\r\n    // TODO: Anguar way to do this?\r\n    const targetElem = document.getElementById(`cc-${this.id}`) as HTMLElement;\r\n\r\n    if (targetElem) {\r\n      if (val === 'on') {\r\n        targetElem.style.background = 'var(--gradient-background)';\r\n      }\r\n\r\n      if (val === 'off') {\r\n        targetElem.style.background = 'var(--default-background)';\r\n      }\r\n    } else {\r\n      console.warn(`no elem to assign gradient to.`);\r\n    }\r\n  }\r\n\r\n  redefineVariable(\r\n    element: HTMLElement,\r\n    variableName: string,\r\n    newValue: string\r\n  ) {\r\n    element.style.setProperty(variableName, newValue);\r\n  }\r\n\r\n  redefineGradientStops(lightMin: number, lightMax: number) {\r\n    if (this.color) {\r\n      const targetElement = document.getElementById(\r\n        `cc-${this.id}`\r\n      ) as HTMLElement;\r\n\r\n      const stops = [\r\n        '--grad-stop-0',\r\n        '--grad-stop-1',\r\n        '--grad-stop-2',\r\n        '--grad-stop-3',\r\n        '--grad-stop-4',\r\n        '--grad-stop-5',\r\n      ];\r\n\r\n      // get new stop values\r\n      const stopInterval = (lightMax - lightMin) / (stops.length - 1);\r\n      const stopVals = [];\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetLight = stopInterval * i + lightMin;\r\n        targetLight;\r\n\r\n        const stopColor = this.cus.createSrgbColor(this.color, targetLight);\r\n\r\n        stopVals.push(stopColor);\r\n      }\r\n\r\n      // assign new stop values\r\n\r\n      for (let i = 0; i < stops.length; i++) {\r\n        const targetStop = stops[i];\r\n        const targetStopVal = stopVals[i];\r\n\r\n        if (targetStopVal) {\r\n          this.redefineVariable(targetElement, targetStop, targetStopVal);\r\n        } else {\r\n          console.log(`no new val to assign`);\r\n        }\r\n      }\r\n    } else {\r\n      console.log(`no color specified`);\r\n    }\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    if (this.color) {\r\n      this.getAndSetLightnessRange(this.color, {\r\n        constantChroma: this.constantChroma,\r\n      });\r\n    } else {\r\n      console.warn(`no color specified to comp`);\r\n    }\r\n\r\n    if (this.showGradient) {\r\n      this.gradient('on');\r\n    }\r\n\r\n    if (!this.showGradient) {\r\n      this.gradient('off');\r\n    }\r\n\r\n    if (this.resetSlider) {\r\n      this.reset();\r\n    }\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -2783,11 +3262,11 @@
                 "OnInit",
                 "OnChanges"
             ],
-            "templateData": "<div [id]=\"'cc-' + id\" class=\"comp-container\">\r\n  <label [for]=\"id\" class=\"sr-only\">Chroma and hue bound Lightness</label>\r\n  <input\r\n    *ngIf=\"slideMin != slideMax\"\r\n    type=\"range\"\r\n    [name]=\"name\"\r\n    [id]=\"id\"\r\n    [min]=\"slideMin\"\r\n    [max]=\"slideMax\"\r\n    [step]=\"slideInterval\"\r\n    [value]=\"value\"\r\n    (input)=\"handleSliding($event)\"\r\n  />\r\n  <div *ngIf=\"slideMin === slideMax\" class=\"special-case\">\r\n    <div>!</div>\r\n  </div>\r\n</div>\r\n\r\n<div class=\"dev-overlay\" [ngClass]=\"{ active: debug }\">\r\n  <h2>dev overlay</h2>\r\n\r\n  <div\r\n    class=\"light-variant-chip\"\r\n    [style.borderColor]=\"devColorVariant\"\r\n    [style.backgroundColor]=\"color\"\r\n  ></div>\r\n</div>\r\n"
+            "templateData": "<div [id]=\"'cc-' + id\" class=\"comp-container\">\r\n  <label [for]=\"id\" class=\"sr-only\">Chroma and hue bound Lightness</label>\r\n\r\n  @if(slideMin != slideMax){\r\n  <input\r\n    type=\"range\"\r\n    [name]=\"name\"\r\n    [id]=\"id\"\r\n    [min]=\"slideMin\"\r\n    [max]=\"slideMax\"\r\n    [step]=\"slideInterval\"\r\n    [value]=\"value\"\r\n    (input)=\"handleSliding($event)\"\r\n  />\r\n  } @else if (slideMin === slideMax) {\r\n  <div class=\"special-case\">\r\n    <div>!</div>\r\n  </div>\r\n\r\n  }\r\n</div>\r\n\r\n<div class=\"dev-overlay\" [ngClass]=\"{ active: debug }\">\r\n  <h2>dev overlay</h2>\r\n\r\n  <div\r\n    class=\"light-variant-chip\"\r\n    [style.borderColor]=\"devColorVariant\"\r\n    [style.backgroundColor]=\"color\"\r\n  ></div>\r\n</div>\r\n"
         },
         {
             "name": "CopyToClipboardButtonComponent",
-            "id": "component-CopyToClipboardButtonComponent-52c36e75568442b09fb7bb1de50799964d009abcf096115c2a20195a8b5d38085dd55c11ed393401f70016b466e623dd9ed67e9ba69846a727d520a7caef93d8",
+            "id": "component-CopyToClipboardButtonComponent-419056953d28dea5bfae8ad8c18913755927f22ca97662c0042dbb06193323f890b247be2d0c134f02cd468653c7325e124b216c46ea458f797973dd29bfc31d",
             "file": "src/app/copy-to-clipboard-button/copy-to-clipboard-button.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -2810,7 +3289,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 14,
+                    "line": 15,
                     "type": "string | null",
                     "decorators": []
                 }
@@ -2821,7 +3300,7 @@
                     "defaultValue": "new EventEmitter<CopyToClipboardEvent>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 15,
+                    "line": 16,
                     "type": "EventEmitter"
                 }
             ],
@@ -2833,7 +3312,7 @@
                     "optional": false,
                     "returnType": "Promise<void>",
                     "typeParameters": [],
-                    "line": 17,
+                    "line": 18,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "modifierKind": [
@@ -2845,12 +3324,12 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, Input, Output, EventEmitter } from '@angular/core';\r\n\r\nexport class CopyToClipboardEvent {\r\n  copied: boolean = false;\r\n  color: string | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-copy-to-clipboard-button',\r\n  templateUrl: './copy-to-clipboard-button.component.html',\r\n  styleUrls: ['./copy-to-clipboard-button.component.scss'],\r\n})\r\nexport class CopyToClipboardButtonComponent {\r\n  @Input() color: string | null = null;\r\n  @Output() copyEvent = new EventEmitter<CopyToClipboardEvent>();\r\n\r\n  async copyToClipboard(): Promise<void> {\r\n    if (this.color) {\r\n      const colorSansHex = this.color.replace('#', '');\r\n\r\n      try {\r\n        await navigator.clipboard.writeText(colorSansHex);\r\n\r\n        this.copyEvent.emit({\r\n          copied: true,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        // console.log(this.color, 'copied to clipboard');\r\n      } catch (err) {\r\n        this.copyEvent.emit({\r\n          copied: false,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        console.error('Failed to copy text: ', err);\r\n      }\r\n    } else {\r\n      console.error('nothing to copy');\r\n    }\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, Input, Output, EventEmitter } from '@angular/core';\r\n\r\nexport class CopyToClipboardEvent {\r\n  copied: boolean = false;\r\n  color: string | null = null;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-copy-to-clipboard-button',\r\n  templateUrl: './copy-to-clipboard-button.component.html',\r\n  styleUrls: ['./copy-to-clipboard-button.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class CopyToClipboardButtonComponent {\r\n  @Input() color: string | null = null;\r\n  @Output() copyEvent = new EventEmitter<CopyToClipboardEvent>();\r\n\r\n  async copyToClipboard(): Promise<void> {\r\n    if (this.color) {\r\n      const colorSansHex = this.color.replace('#', '');\r\n\r\n      try {\r\n        await navigator.clipboard.writeText(colorSansHex);\r\n\r\n        this.copyEvent.emit({\r\n          copied: true,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        // console.log(this.color, 'copied to clipboard');\r\n      } catch (err) {\r\n        this.copyEvent.emit({\r\n          copied: false,\r\n          color: colorSansHex,\r\n        });\r\n\r\n        console.error('Failed to copy text: ', err);\r\n      }\r\n    } else {\r\n      console.error('nothing to copy');\r\n    }\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -2950,7 +3429,7 @@
         },
         {
             "name": "MetadataComponent",
-            "id": "component-MetadataComponent-aa1ba1bdde20bb0c865c882e229ec13032bfbcfbea14c4fb9cdb489d20deff612b70b87fad344a7b0e2172e9cbdeb6719bdfbf35cf57ac0ead591273e7bfa441",
+            "id": "component-MetadataComponent-e5ef3d4ca16359eb762da342e7ff9532d279385bbaa74bd516eccff0439fdc830eed2522c8c82f071620fa601268b7b90b2411e8fe5518f507eeca4328172653",
             "file": "src/app/metadata/metadata.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -2973,7 +3452,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 23,
+                    "line": 24,
                     "type": "string | null",
                     "decorators": []
                 },
@@ -2982,7 +3461,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 24,
+                    "line": 25,
                     "type": "string | null",
                     "decorators": []
                 }
@@ -2997,7 +3476,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 27
+                    "line": 28
                 },
                 {
                     "name": "colorOneMeta",
@@ -3007,7 +3486,7 @@
                     "type": "ColorMetaObj | null",
                     "optional": false,
                     "description": "",
-                    "line": 42
+                    "line": 43
                 },
                 {
                     "name": "colorTwoMeta",
@@ -3017,7 +3496,7 @@
                     "type": "ColorMetaObj | null",
                     "optional": false,
                     "description": "",
-                    "line": 44
+                    "line": 45
                 },
                 {
                     "name": "cus",
@@ -3027,7 +3506,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 26
+                    "line": 27
                 },
                 {
                     "name": "differences",
@@ -3037,7 +3516,7 @@
                     "type": "DifferencesDataObj",
                     "optional": false,
                     "description": "",
-                    "line": 29
+                    "line": 30
                 },
                 {
                     "name": "successes",
@@ -3047,7 +3526,7 @@
                     "type": "SuccessesObj",
                     "optional": false,
                     "description": "",
-                    "line": 36
+                    "line": 37
                 }
             ],
             "methodsClass": [
@@ -3057,7 +3536,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 58,
+                    "line": 59,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -3067,7 +3546,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 46,
+                    "line": 47,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -3077,7 +3556,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 86,
+                    "line": 87,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -3087,7 +3566,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 120,
+                    "line": 121,
                     "deprecated": false,
                     "deprecationMessage": ""
                 }
@@ -3096,12 +3575,12 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, Input, OnChanges, inject } from '@angular/core';\r\nimport { ColorUtilService, ColorMetaObj } from '../services/color-util.service';\r\nimport { ColorMetricsService } from '../services/color-metrics.service';\r\n\r\nexport class DifferencesDataObj {\r\n  deltaE: number | null = null;\r\n  wcag2Old: number | null = null;\r\n  wcag2New: number | null = null;\r\n  apca: number | null = null;\r\n}\r\nexport class SuccessesObj {\r\n  text: 'pass' | 'fail' | null = null;\r\n  largeText: 'pass' | 'fail' | null = null;\r\n  objectMinDimension: number | string = NaN;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-metadata',\r\n  templateUrl: './metadata.component.html',\r\n  styleUrls: ['./metadata.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class MetadataComponent implements OnChanges {\r\n  @Input() colorOne: string | null = null;\r\n  @Input() colorTwo: string | null = null;\r\n\r\n  cus = inject(ColorUtilService);\r\n  cms = inject(ColorMetricsService);\r\n\r\n  differences: DifferencesDataObj = {\r\n    deltaE: null,\r\n    wcag2Old: null,\r\n    wcag2New: null,\r\n    apca: NaN,\r\n  };\r\n\r\n  successes: SuccessesObj = {\r\n    text: null,\r\n    largeText: null,\r\n    objectMinDimension: NaN,\r\n  };\r\n\r\n  colorOneMeta: ColorMetaObj | null = null;\r\n\r\n  colorTwoMeta: ColorMetaObj | null = null;\r\n\r\n  getColorMeta() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      if (this.cus.getColorMeta(this.colorOne)) {\r\n        this.colorOneMeta = this.cus.getColorMeta(this.colorOne);\r\n\r\n        this.colorTwoMeta = this.cus.getColorMeta(this.colorTwo);\r\n      }\r\n    } else {\r\n      console.warn(`failed to get color meta`);\r\n    }\r\n  }\r\n\r\n  getColorDifference() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      this.differences.deltaE = this.cus.calcDeltaE(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.wcag2New = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      this.differences.wcag2Old = this.cus.calcWcag2(\r\n        this.colorOne,\r\n        this.colorTwo\r\n      );\r\n\r\n      this.differences.apca = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n    } else {\r\n      console.warn(`failed to get color differences`);\r\n    }\r\n  }\r\n\r\n  getSuccesses() {\r\n    if (this.colorOne && this.colorTwo) {\r\n      const wcagNew = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'bpca'\r\n      );\r\n\r\n      const apcaScore = this.cms.getContrast(\r\n        this.colorOne,\r\n        this.colorTwo,\r\n        'apca'\r\n      );\r\n\r\n      if (wcagNew && apcaScore) {\r\n        if (wcagNew >= 0 && Math.abs(apcaScore) >= 0) {\r\n          this.successes.text = wcagNew >= 4.5 ? 'pass' : 'fail';\r\n\r\n          this.successes.largeText = wcagNew >= 3 ? 'pass' : 'fail';\r\n\r\n          const minDimension = this.cus.getMinObjectDimension(apcaScore);\r\n\r\n          this.successes.objectMinDimension = Number.isNaN(minDimension)\r\n            ? 'invisible'\r\n            : minDimension;\r\n        } else {\r\n          console.warn(`something wonky with calculating scores`);\r\n        }\r\n      } else {\r\n        console.warn(`trouble getting scores`);\r\n      }\r\n    }\r\n  }\r\n\r\n  ngOnChanges() {\r\n    this.getColorMeta();\r\n\r\n    this.getColorDifference();\r\n\r\n    this.getSuccesses();\r\n\r\n    // if (this.colorOne && this.colorTwo) {\r\n    //   if (this.differences.apca) {\r\n    //     console.log(this.cus.getMinObjectDimension(this.differences.apca));\r\n    //   }\r\n    // }\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -3211,7 +3690,7 @@
         },
         {
             "name": "PaletteTableComponent",
-            "id": "component-PaletteTableComponent-a6a03c6206bf595143b3f7d21afab4f4df5d1d3aec6a6711345b00465fe507259162381cca5ed1840bd3c06962c2a46de601b511dba7461cb565c3f09045777c",
+            "id": "component-PaletteTableComponent-30c9ccde20d791ae5d800c21dd5719c14f9d84147637a9213c9d619ea3dc7d39f35fb25baf94be1f669434629bb2ae936e94c8e932b77840a6d63a24e13207bc",
             "file": "src/app/palette-table/palette-table.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -3234,7 +3713,7 @@
                     "defaultValue": "null",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 37,
+                    "line": 38,
                     "type": "string | null",
                     "decorators": []
                 }
@@ -3245,7 +3724,7 @@
                     "defaultValue": "new EventEmitter<TableColorCell>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 39,
+                    "line": 40,
                     "type": "EventEmitter"
                 }
             ],
@@ -3258,7 +3737,7 @@
                     "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 44
+                    "line": 45
                 },
                 {
                     "name": "cus",
@@ -3268,7 +3747,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 41
+                    "line": 42
                 },
                 {
                     "name": "dataStruct",
@@ -3278,7 +3757,7 @@
                     "type": "TableData",
                     "optional": false,
                     "description": "",
-                    "line": 49
+                    "line": 50
                 },
                 {
                     "name": "lightSteps",
@@ -3288,7 +3767,7 @@
                     "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 43
+                    "line": 44
                 },
                 {
                     "name": "tableHeaders",
@@ -3298,7 +3777,7 @@
                     "type": "Array<number>",
                     "optional": false,
                     "description": "",
-                    "line": 46
+                    "line": 47
                 }
             ],
             "methodsClass": [
@@ -3308,7 +3787,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 51,
+                    "line": 52,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -3318,7 +3797,7 @@
                     "optional": false,
                     "returnType": "any",
                     "typeParameters": [],
-                    "line": 80,
+                    "line": 81,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "modifierKind": [
@@ -3338,7 +3817,7 @@
                     "optional": false,
                     "returnType": "\"white\" | \"black\"",
                     "typeParameters": [],
-                    "line": 74,
+                    "line": 75,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -3366,7 +3845,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 94,
+                    "line": 95,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -3387,7 +3866,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 100,
+                    "line": 101,
                     "deprecated": false,
                     "deprecationMessage": ""
                 },
@@ -3410,7 +3889,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 65,
+                    "line": 66,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -3439,16 +3918,16 @@
             "deprecationMessage": "",
             "hostBindings": [],
             "hostListeners": [],
-            "standalone": false,
+            "standalone": true,
             "imports": [],
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
+            "sourceCode": "import {\r\n  Component,\r\n  OnInit,\r\n  OnChanges,\r\n  AfterViewInit,\r\n  Input,\r\n  SimpleChanges,\r\n  Output,\r\n  EventEmitter,\r\n  inject,\r\n} from '@angular/core';\r\nimport { ColorUtilService } from '../services/color-util.service';\r\n\r\nexport class TableColorCell {\r\n  color: string | null = null;\r\n  lightness: number = NaN;\r\n  chroma: number = NaN;\r\n  hue: number = NaN;\r\n  deltaE: number | null = null;\r\n  deltaLightness: number | null = null;\r\n  deltaChroma: number | null = null;\r\n\r\n  // pContrast: number = NaN;\r\n  // wacg2Comp: number = NaN;\r\n}\r\n\r\nexport type TableRow = Array<TableColorCell>;\r\n\r\nexport type TableData = Array<TableRow>;\r\n\r\n@Component({\r\n  selector: 'app-palette-table',\r\n  templateUrl: './palette-table.component.html',\r\n  styleUrls: ['./palette-table.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class PaletteTableComponent implements OnInit, OnChanges {\r\n  @Input() color: string | null = null;\r\n\r\n  @Output() selectedColor = new EventEmitter<TableColorCell>();\r\n\r\n  cus = inject(ColorUtilService);\r\n\r\n  lightSteps = 5;\r\n  chromaSteps = 14;\r\n\r\n  tableHeaders: Array<number> = [];\r\n\r\n  // An array of arrays where each array is a 'row' of data, and objects are cells of data.\r\n  dataStruct: TableData = [];\r\n\r\n  getTableColumnHeaders() {\r\n    const headers = [];\r\n\r\n    const sampleRow = this.dataStruct[0];\r\n\r\n    for (let i = 0; i < sampleRow.length; i++) {\r\n      const curCell = sampleRow[i];\r\n\r\n      headers.push(curCell.chroma);\r\n    }\r\n\r\n    this.tableHeaders = headers;\r\n  }\r\n\r\n  selectColor(rowNum: number, columnNum: number) {\r\n    const targetColor = this.dataStruct[rowNum][columnNum];\r\n\r\n    // console.log(rowNum, columnNum);\r\n    // console.log(targetColor.color);\r\n\r\n    this.selectedColor.emit(targetColor);\r\n  }\r\n\r\n  getTextColor(bkgdColor: string) {\r\n    return (this.cus.calcWcag2('white', bkgdColor) as number) >= 7\r\n      ? 'white'\r\n      : 'black';\r\n  }\r\n\r\n  async getTableData() {\r\n    if (this.color) {\r\n      this.dataStruct = await this.cus.generateAllOklchVariants(\r\n        this.color,\r\n        this.lightSteps,\r\n        this.chromaSteps\r\n      );\r\n\r\n      this.getTableColumnHeaders();\r\n    } else {\r\n      console.warn(`no color for palette table`);\r\n    }\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    // console.log(`-----OnChanges`);\r\n\r\n    this.getTableData();\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    // console.log(`-----OnInit`);\r\n    // this.getTableData();\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
-                    "data": ".comp-container {\r\n  border-radius: 2px;\r\n\r\n  table {\r\n    border-collapse: collapse;\r\n\r\n    th {\r\n      font-family: var(--mono-font);\r\n    }\r\n\r\n    td {\r\n      margin: 0;\r\n      padding: 7.5px;\r\n      line-height: 0;\r\n    }\r\n\r\n    tbody {\r\n      th {\r\n        text-align: right;\r\n      }\r\n    }\r\n\r\n    button {\r\n      margin: 0;\r\n      padding: 0;\r\n      border: transparent 2px solid;\r\n      box-sizing: border-box;\r\n      border-radius: 5px;\r\n      min-width: 22px;\r\n      min-height: 22px;\r\n      line-height: 0;\r\n      font-size: 0;\r\n\r\n      span {\r\n        line-height: 0;\r\n      }\r\n\r\n      &:hover:not([disabled]) {\r\n        background-color: white !important;\r\n        border-color: #8f8f8f !important;\r\n      }\r\n    }\r\n  }\r\n}\r\n",
+                    "data": ".comp-container {\r\n  border-radius: 2px;\r\n\r\n  table {\r\n    border-collapse: collapse;\r\n\r\n    th {\r\n      font-family: var(--mono-font);\r\n    }\r\n\r\n    td {\r\n      margin: 0;\r\n      padding: 7.5px;\r\n      line-height: 0;\r\n    }\r\n\r\n    tbody {\r\n      th {\r\n        text-align: right;\r\n      }\r\n    }\r\n\r\n    button {\r\n      margin: 0;\r\n      padding: 0;\r\n      border: transparent 2px solid;\r\n      box-sizing: border-box;\r\n      border-radius: 5px;\r\n      min-width: 22px;\r\n      min-height: 22px;\r\n      line-height: 0;\r\n      font-size: 0;\r\n\r\n      span {\r\n        line-height: 0;\r\n      }\r\n\r\n      &:hover:not([disabled]) {\r\n        background-color: white !important;\r\n        border-color: #8f8f8f !important;\r\n      }\r\n    }\r\n\r\n    .no-color {\r\n      margin: 0;\r\n      padding: 0;\r\n      border: transparent 2px solid;\r\n      box-sizing: border-box;\r\n      border-radius: 5px;\r\n      min-width: 22px;\r\n      min-height: 22px;\r\n      line-height: 0;\r\n      font-size: 0;\r\n    }\r\n  }\r\n}\r\n",
                     "styleUrl": "./palette-table.component.scss"
                 }
             ],
@@ -3458,7 +3937,7 @@
                 "OnInit",
                 "OnChanges"
             ],
-            "templateData": "<div class=\"comp-container\">\r\n  <table *ngIf=\"dataStruct\" [style.backgroundColor]=\"color\">\r\n    <caption class=\"sr-only\">\r\n      Collection of colors sharing the same hue organized by chroma as columns,\r\n      and lightness as rows. Selecting a button in the table will copy the its\r\n      color to the clipboard.\r\n    </caption>\r\n    <thead>\r\n      <tr class=\"sr-only\">\r\n        <!-- <tr> -->\r\n        <td>&nbsp;</td>\r\n        <th *ngFor=\"let header of tableHeaders\">{{ header.toFixed(5) }}</th>\r\n      </tr>\r\n    </thead>\r\n    <tbody>\r\n      <tr *ngFor=\"let row of dataStruct; index as i\">\r\n        <th class=\"sr-only\">{{ row[0][\"lightness\"].toFixed(5) }}</th>\r\n        <td *ngFor=\"let cell of row; index as j\">\r\n          <div>\r\n            <button\r\n              [disabled]=\"!cell.color\"\r\n              [style.backgroundColor]=\"cell.color ? cell.color : 'transparent'\"\r\n              [style.color]=\"cell.color ? getTextColor(cell.color) : 'black'\"\r\n              [style.borderColor]=\"cell.deltaE === 0 ? 'white' : 'auto'\"\r\n              [style.backgroundColor]=\"cell.deltaE === 0 ? 'black' : 'auto'\"\r\n              (click)=\"selectColor(i, j)\"\r\n            >\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\">{{ cell.color }}, </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\"\r\n                >{{ cell.deltaLightness }}%,\r\n              </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\"\r\n                >{{ cell.deltaChroma }}%,\r\n              </span>\r\n              <span *ngIf=\"cell.color\" class=\"sr-only\">{{ cell.deltaE }}</span>\r\n            </button>\r\n          </div>\r\n        </td>\r\n      </tr>\r\n    </tbody>\r\n  </table>\r\n</div>\r\n"
+            "templateData": "<div class=\"comp-container\">\r\n  @if (dataStruct) {\r\n  <table [style.backgroundColor]=\"color\">\r\n    <caption class=\"sr-only\">\r\n      Collection of colors sharing the same hue organized by chroma as columns,\r\n      and lightness as rows. Selecting a button in the table will copy the its\r\n      color to the clipboard.\r\n    </caption>\r\n    <thead>\r\n      <tr class=\"sr-only\">\r\n        <!-- <tr> -->\r\n        <td>&nbsp;</td>\r\n\r\n        @for (header of tableHeaders; track $index) {\r\n        <th>{{ header.toFixed(5) }}</th>\r\n        }\r\n      </tr>\r\n    </thead>\r\n    <tbody>\r\n      @for (row of dataStruct; track i; let i = $index) {\r\n      <tr>\r\n        <th class=\"sr-only\">{{ row[0][\"lightness\"].toFixed(5) }}</th>\r\n\r\n        @for (cell of row; track j; let j = $index) {\r\n        <td>\r\n          <div>\r\n            @if (cell.color) {\r\n            <button\r\n              [style.backgroundColor]=\"cell.color ? cell.color : 'transparent'\"\r\n              [style.color]=\"getTextColor(cell.color)\"\r\n              [style.borderColor]=\"cell.deltaE === 0 ? 'white' : cell.color\"\r\n              [style.backgroundColor]=\"cell.deltaE === 0 ? 'black' : cell.color\"\r\n              (click)=\"selectColor(i, j)\"\r\n            >\r\n              <span class=\"sr-only\">{{ cell.color }}, </span>\r\n              <span class=\"sr-only\">{{ cell.deltaLightness }}%, </span>\r\n              <span class=\"sr-only\">{{ cell.deltaChroma }}%, </span>\r\n              <span class=\"sr-only\">{{ cell.deltaE }}</span>\r\n            </button>\r\n\r\n            } @else {\r\n            <div class=\"no-color\">\r\n              <p class=\"sr-only\">color out of sRGB gamut</p>\r\n            </div>\r\n            }\r\n          </div>\r\n        </td>\r\n        }\r\n      </tr>\r\n      }\r\n    </tbody>\r\n  </table>\r\n  }\r\n</div>\r\n"
         }
     ],
     "modules": [],
@@ -4705,7 +5184,7 @@
                 "linktype": "component",
                 "name": "AppComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/2",
+                "coverageCount": "0/25",
                 "status": "low"
             },
             {

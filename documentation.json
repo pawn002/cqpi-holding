@@ -2,30 +2,6 @@
     "pipes": [],
     "interfaces": [
         {
-            "name": "AlertMessagObj",
-            "id": "interface-AlertMessagObj-cdb329222a8080adf986a50be0647ac772ed7ef12c7f269903868495190f685d352c2aa4a8ae07fc959fbbe714fda10d15184140203fc0b9bf6f101b9b7fb31c",
-            "file": "src/app/alert/alert.component.ts",
-            "deprecated": false,
-            "deprecationMessage": "",
-            "type": "interface",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
-            "properties": [
-                {
-                    "name": "message",
-                    "deprecated": false,
-                    "deprecationMessage": "",
-                    "type": "string",
-                    "optional": false,
-                    "description": "",
-                    "line": 13
-                }
-            ],
-            "indexSignatures": [],
-            "kind": 171,
-            "methods": [],
-            "extends": []
-        },
-        {
             "name": "ColorMetaObj",
             "id": "interface-ColorMetaObj-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
             "file": "src/app/services/color-util.service.ts",
@@ -1276,6 +1252,34 @@
     "interceptors": [],
     "classes": [
         {
+            "name": "AlertMessagObj",
+            "id": "class-AlertMessagObj-8d596b6b8b22f72f64eed4f7b3e2cc4dac0016d01385ddf28d98529f257d51741c8bf0eef08a0b4d96503b4f7b3d53c8f914fdafa07aae9e92ae9771828cfdd2",
+            "file": "src/app/alert/alert.component.ts",
+            "deprecated": false,
+            "deprecationMessage": "",
+            "type": "class",
+            "sourceCode": "import { Component, EventEmitter, Output, input, effect } from '@angular/core';\r\nimport { random, times } from 'lodash';\r\n\r\nexport class AlertMessagObj {\r\n  message: string = '';\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent {\r\n  // Following line is the Component's input using signals.\r\n  alertMessage = input<AlertMessagObj>();\r\n\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  constructor() {\r\n    effect(() => {\r\n      const messagePresent = this.alertMessage()?.message;\r\n\r\n      if (messagePresent) {\r\n        this.uniqId = this.generateRandomString(12);\r\n\r\n        this.showAlert = true;\r\n\r\n        if (this.timeout) {\r\n          clearTimeout(this.timeout);\r\n        }\r\n\r\n        this.timeout = setTimeout(() => {\r\n          this.showAlert = false;\r\n        }, 5000) as unknown as number;\r\n      }\r\n    });\r\n  }\r\n}\r\n",
+            "properties": [
+                {
+                    "name": "message",
+                    "defaultValue": "''",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 5
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "extends": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
             "name": "ChromaMatchObject",
             "id": "class-ChromaMatchObject-235b64646799eccbc94f9d47895fb9af079fe6a4edbf5b31862e0a5154ed1a57d97867c559875771d3e2113fd452091467feb06abbdc4f9bbdcece0f30d42fcf",
             "file": "src/app/services/color-util.service.ts",
@@ -1598,7 +1602,7 @@
     "components": [
         {
             "name": "AlertComponent",
-            "id": "component-AlertComponent-cdb329222a8080adf986a50be0647ac772ed7ef12c7f269903868495190f685d352c2aa4a8ae07fc959fbbe714fda10d15184140203fc0b9bf6f101b9b7fb31c",
+            "id": "component-AlertComponent-8d596b6b8b22f72f64eed4f7b3e2cc4dac0016d01385ddf28d98529f257d51741c8bf0eef08a0b4d96503b4f7b3d53c8f914fdafa07aae9e92ae9771828cfdd2",
             "file": "src/app/alert/alert.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -1615,28 +1619,28 @@
             ],
             "viewProviders": [],
             "hostDirectives": [],
-            "inputsClass": [
-                {
-                    "name": "alertMessage",
-                    "defaultValue": "null",
-                    "deprecated": false,
-                    "deprecationMessage": "",
-                    "line": 23,
-                    "type": "AlertMessagObj | null",
-                    "decorators": []
-                }
-            ],
+            "inputsClass": [],
             "outputsClass": [
                 {
                     "name": "alertClosed",
                     "defaultValue": "new EventEmitter<boolean>()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "line": 24,
+                    "line": 18,
                     "type": "EventEmitter"
                 }
             ],
             "propertiesClass": [
+                {
+                    "name": "alertMessage",
+                    "defaultValue": "input<AlertMessagObj>()",
+                    "deprecated": false,
+                    "deprecationMessage": "",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 16
+                },
                 {
                     "name": "showAlert",
                     "defaultValue": "false",
@@ -1645,7 +1649,7 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 26
+                    "line": 20
                 },
                 {
                     "name": "timeout",
@@ -1655,7 +1659,7 @@
                     "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 30
+                    "line": 24
                 },
                 {
                     "name": "uniqId",
@@ -1665,7 +1669,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 28
+                    "line": 22
                 }
             ],
             "methodsClass": [
@@ -1682,7 +1686,7 @@
                     "optional": false,
                     "returnType": "any",
                     "typeParameters": [],
-                    "line": 32,
+                    "line": 26,
                     "deprecated": false,
                     "deprecationMessage": "",
                     "jsdoctags": [
@@ -1703,45 +1707,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 36,
-                    "deprecated": false,
-                    "deprecationMessage": ""
-                },
-                {
-                    "name": "ngOnChanges",
-                    "args": [
-                        {
-                            "name": "changes",
-                            "type": "SimpleChanges",
-                            "deprecated": false,
-                            "deprecationMessage": ""
-                        }
-                    ],
-                    "optional": false,
-                    "returnType": "void",
-                    "typeParameters": [],
-                    "line": 44,
-                    "deprecated": false,
-                    "deprecationMessage": "",
-                    "jsdoctags": [
-                        {
-                            "name": "changes",
-                            "type": "SimpleChanges",
-                            "deprecated": false,
-                            "deprecationMessage": "",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "ngOnInit",
-                    "args": [],
-                    "optional": false,
-                    "returnType": "void",
-                    "typeParameters": [],
-                    "line": 58,
+                    "line": 30,
                     "deprecated": false,
                     "deprecationMessage": ""
                 }
@@ -1755,7 +1721,7 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import {\r\n  Component,\r\n  EventEmitter,\r\n  Input,\r\n  Output,\r\n  OnChanges,\r\n  SimpleChanges,\r\n  OnInit,\r\n} from '@angular/core';\r\nimport { random, sample, times } from 'lodash';\r\n\r\nexport interface AlertMessagObj {\r\n  message: string;\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent implements OnInit, OnChanges {\r\n  @Input() alertMessage: AlertMessagObj | null = null;\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  ngOnChanges(changes: SimpleChanges): void {\r\n    this.uniqId = this.generateRandomString(12);\r\n\r\n    this.showAlert = true;\r\n\r\n    if (this.timeout) {\r\n      clearTimeout(this.timeout);\r\n    }\r\n\r\n    this.timeout = setTimeout(() => {\r\n      this.showAlert = false;\r\n    }, 5000) as unknown as number;\r\n  }\r\n\r\n  ngOnInit(): void {\r\n    this.showAlert = false;\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, EventEmitter, Output, input, effect } from '@angular/core';\r\nimport { random, times } from 'lodash';\r\n\r\nexport class AlertMessagObj {\r\n  message: string = '';\r\n}\r\n\r\n@Component({\r\n  selector: 'app-alert',\r\n  templateUrl: './alert.component.html',\r\n  styleUrls: ['./alert.component.scss'],\r\n  standalone: true,\r\n})\r\nexport class AlertComponent {\r\n  // Following line is the Component's input using signals.\r\n  alertMessage = input<AlertMessagObj>();\r\n\r\n  @Output() alertClosed = new EventEmitter<boolean>();\r\n\r\n  showAlert: boolean = false;\r\n\r\n  uniqId: string = '';\r\n\r\n  timeout: number = NaN;\r\n\r\n  generateRandomString(length: number) {\r\n    return times(length, () => random(35).toString(36)).join('');\r\n  }\r\n\r\n  hideAlert() {\r\n    this.showAlert = false;\r\n\r\n    this.uniqId = '';\r\n\r\n    this.alertClosed.emit(true);\r\n  }\r\n\r\n  constructor() {\r\n    effect(() => {\r\n      const messagePresent = this.alertMessage()?.message;\r\n\r\n      if (messagePresent) {\r\n        this.uniqId = this.generateRandomString(12);\r\n\r\n        this.showAlert = true;\r\n\r\n        if (this.timeout) {\r\n          clearTimeout(this.timeout);\r\n        }\r\n\r\n        this.timeout = setTimeout(() => {\r\n          this.showAlert = false;\r\n        }, 5000) as unknown as number;\r\n      }\r\n    });\r\n  }\r\n}\r\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -1764,16 +1730,20 @@
                 }
             ],
             "stylesData": "",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "deprecated": false,
+                "deprecationMessage": "",
+                "args": [],
+                "line": 36
+            },
             "extends": [],
-            "implements": [
-                "OnInit",
-                "OnChanges"
-            ],
-            "templateData": "<div class=\"comp-container\" role=\"alert\">\r\n  <div class=\"alert-content\">\r\n    @if (showAlert){\r\n    <p [innerText]=\"alertMessage?.message\"></p>\r\n    <p class=\"msg-id\">Message ID: {{ uniqId }}</p>\r\n    <!-- <button (click)=\"hideAlert()\"><span>Dismiss</span></button> -->\r\n\r\n    }\r\n    <!-- <ng-container\r\n    >\r\n    </ng-container> -->\r\n  </div>\r\n</div>\r\n"
+            "templateData": "<div class=\"comp-container\" role=\"alert\">\r\n  <div class=\"alert-content\">\r\n    @if (showAlert){\r\n    <p>{{ alertMessage()?.message }}</p>\r\n\r\n    <p class=\"msg-id\">Message ID: {{ uniqId }}</p>\r\n\r\n    <!-- <button (click)=\"hideAlert()\"><span>Dismiss</span></button> -->\r\n    }\r\n  </div>\r\n</div>\r\n"
         },
         {
             "name": "AppComponent",
-            "id": "component-AppComponent-3ce07a85dce9e6d3d247a167353fa96f8ff981f39258a464f34716fc8cb7ffbd3e0d1c8245572129986d695d3a585f51aa82eef46694ffbaac63658c2d1418d7",
+            "id": "component-AppComponent-08ce29d25de02f4bb19852a6f94ebbb7e5fbc95c88bbb43b383bbd388d9bf44ef552e1e0abe2d24da5929757f821469f7a540077752934bde86fa15ed1d8c3d8",
             "file": "src/app/app.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -1853,10 +1823,10 @@
                 },
                 {
                     "name": "currentAlertMessage",
-                    "defaultValue": "null",
+                    "defaultValue": "new AlertMessagObj()",
                     "deprecated": false,
                     "deprecationMessage": "",
-                    "type": "AlertMessagObj | null",
+                    "type": "AlertMessagObj",
                     "optional": false,
                     "description": "",
                     "line": 51
@@ -2290,7 +2260,7 @@
             "description": "",
             "rawdescription": "\n",
             "type": "component",
-            "sourceCode": "import { Component, inject } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\n\r\nimport { ContrastType } from './services/color-metrics.service';\r\nimport { ColorUtilService } from './services/color-util.service';\r\nimport { CopyToClipboardEvent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { ResetObject } from './color-slider/color-slider.component';\r\nimport { AlertMessagObj } from './alert/alert.component';\r\nimport { TableColorCell } from './palette-table/palette-table.component';\r\n\r\nimport { AlertComponent } from './alert/alert.component';\r\nimport { ColorContrastComponent } from './color-contrast/color-contrast.component';\r\nimport { ColorPickerComponent } from './color-picker/color-picker.component';\r\nimport { ColorSliderComponent } from './color-slider/color-slider.component';\r\nimport { CopyToClipboardButtonComponent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { MetadataComponent } from './metadata/metadata.component';\r\nimport { PaletteTableComponent } from './palette-table/palette-table.component';\r\n\r\n@Component({\r\n  selector: 'app-root',\r\n  standalone: true,\r\n  imports: [\r\n    RouterOutlet,\r\n    AlertComponent,\r\n    ColorContrastComponent,\r\n    ColorPickerComponent,\r\n    ColorSliderComponent,\r\n    CopyToClipboardButtonComponent,\r\n    MetadataComponent,\r\n    PaletteTableComponent,\r\n  ],\r\n  templateUrl: './app.component.html',\r\n  styleUrl: './app.component.scss',\r\n})\r\nexport class AppComponent {\r\n  cus = inject(ColorUtilService);\r\n\r\n  colorPickerOneSelectedColor: string | null = null;\r\n  colorPickerOneComparedColor: string | null = null;\r\n\r\n  colorPickerTwoSelectedColor: string | null = null;\r\n  colorPickerTwoComparedColor: string | null = null;\r\n\r\n  contrastType: ContrastType | 'apca object' = 'apca';\r\n\r\n  resetSlider: ResetObject | null = null;\r\n\r\n  constantChroma: boolean = true;\r\n  showGradient: boolean = true;\r\n\r\n  currentAlertMessage: AlertMessagObj | null = null;\r\n\r\n  handleColorInputInput(inputNumber: 'One' | 'Two', event: string) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneSelectedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event;\r\n    }\r\n  }\r\n\r\n  handleSliderInputInput(inputNumber: 'One' | 'Two', event: string | null) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneComparedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoComparedColor = event;\r\n    }\r\n  }\r\n\r\n  handleCopyEvent(event: CopyToClipboardEvent) {\r\n    if (event.copied) {\r\n      this.alertUser({ message: `${event.color} copied to clipboard.` });\r\n    } else {\r\n      console.error(`color copy error.`);\r\n    }\r\n  }\r\n\r\n  handleColorPaletteButtonEvent(\r\n    paletteChartNum: 'One' | 'Two',\r\n    event: TableColorCell\r\n  ) {\r\n    if (paletteChartNum === 'One') {\r\n      this.colorPickerOneSelectedColor = event.color;\r\n    }\r\n\r\n    if (paletteChartNum === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event.color;\r\n    }\r\n\r\n    this.alertUser({\r\n      message: `Color picker ${paletteChartNum} changed to ${event.color}`,\r\n    });\r\n  }\r\n\r\n  radioChange(changeTo: ContrastType | 'apca object') {\r\n    console.log(changeTo);\r\n    this.contrastType = changeTo;\r\n  }\r\n\r\n  toggleConstantChroma(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.constantChroma = checked ? true : false;\r\n\r\n    this.resetSliders();\r\n  }\r\n\r\n  toggleShowGradient(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.showGradient = checked ? true : false;\r\n  }\r\n\r\n  swapColors() {\r\n    const getColor = (type: 'fg' | 'bg'): string | null => {\r\n      let color: string | null = null;\r\n\r\n      switch (type) {\r\n        case 'fg':\r\n          color = this.colorPickerOneSelectedColor;\r\n\r\n          break;\r\n        case 'bg':\r\n          color = this.colorPickerTwoSelectedColor;\r\n\r\n          break;\r\n\r\n        default:\r\n          break;\r\n      }\r\n\r\n      return color;\r\n    };\r\n\r\n    const oldPairing = {\r\n      foreground: getColor('fg'),\r\n      background: getColor('bg'),\r\n    };\r\n\r\n    const newPairing = {\r\n      foreground: oldPairing.background,\r\n      background: oldPairing.foreground,\r\n    };\r\n\r\n    if (newPairing.foreground && newPairing.background) {\r\n      this.colorPickerOneSelectedColor = newPairing.foreground;\r\n\r\n      this.colorPickerTwoSelectedColor = newPairing.background;\r\n\r\n      this.alertUser({ message: 'Swapped foreground and background colors.' });\r\n    } else {\r\n      console.error('swapping colors went badly. . .');\r\n    }\r\n  }\r\n\r\n  async setRandomColorPair(initialAppColors?: boolean) {\r\n    const initColorPair = await this.cus.getRandomColorPair();\r\n\r\n    const randomColorPair = await this.cus.adjustColorPairForPresentation(\r\n      initColorPair\r\n    );\r\n\r\n    setTimeout(() => {\r\n      this.colorPickerOneSelectedColor = randomColorPair[0];\r\n      this.colorPickerTwoSelectedColor = randomColorPair[1];\r\n\r\n      if (!initialAppColors) {\r\n        this.alertUser({\r\n          message: `Random color pair generated: ${randomColorPair[0]}, and ${randomColorPair[1]}`,\r\n        });\r\n      }\r\n    }, 0);\r\n  }\r\n\r\n  resetSliders() {\r\n    this.resetSlider = { reset: true };\r\n\r\n    this.alertUser({ message: 'Resetted color sliders to initial states.' });\r\n  }\r\n\r\n  async matchChromas() {\r\n    if (this.colorPickerOneSelectedColor && this.colorPickerTwoSelectedColor) {\r\n      const matchedColors = await this.cus.matchChromas([\r\n        this.colorPickerOneSelectedColor,\r\n        this.colorPickerTwoSelectedColor,\r\n      ]);\r\n\r\n      if (\r\n        matchedColors.success &&\r\n        matchedColors.colors &&\r\n        matchedColors.chroma\r\n      ) {\r\n        this.colorPickerOneSelectedColor = matchedColors.colors[0];\r\n        this.colorPickerTwoSelectedColor = matchedColors.colors[1];\r\n\r\n        this.alertUser({\r\n          message: `Chroma matched foreground and background colors.`,\r\n        });\r\n      } else {\r\n        this.alertUser({ message: 'Unable to match  chroma across colors.' });\r\n      }\r\n    }\r\n  }\r\n\r\n  alertUser(message: AlertMessagObj) {\r\n    this.currentAlertMessage = message;\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngAfterViewInit(): void {\r\n    this.setRandomColorPair(true);\r\n  }\r\n}\r\n",
+            "sourceCode": "import { Component, inject } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\n\r\nimport { ContrastType } from './services/color-metrics.service';\r\nimport { ColorUtilService } from './services/color-util.service';\r\nimport { CopyToClipboardEvent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { ResetObject } from './color-slider/color-slider.component';\r\nimport { AlertMessagObj } from './alert/alert.component';\r\nimport { TableColorCell } from './palette-table/palette-table.component';\r\n\r\nimport { AlertComponent } from './alert/alert.component';\r\nimport { ColorContrastComponent } from './color-contrast/color-contrast.component';\r\nimport { ColorPickerComponent } from './color-picker/color-picker.component';\r\nimport { ColorSliderComponent } from './color-slider/color-slider.component';\r\nimport { CopyToClipboardButtonComponent } from './copy-to-clipboard-button/copy-to-clipboard-button.component';\r\nimport { MetadataComponent } from './metadata/metadata.component';\r\nimport { PaletteTableComponent } from './palette-table/palette-table.component';\r\n\r\n@Component({\r\n  selector: 'app-root',\r\n  standalone: true,\r\n  imports: [\r\n    RouterOutlet,\r\n    AlertComponent,\r\n    ColorContrastComponent,\r\n    ColorPickerComponent,\r\n    ColorSliderComponent,\r\n    CopyToClipboardButtonComponent,\r\n    MetadataComponent,\r\n    PaletteTableComponent,\r\n  ],\r\n  templateUrl: './app.component.html',\r\n  styleUrl: './app.component.scss',\r\n})\r\nexport class AppComponent {\r\n  cus = inject(ColorUtilService);\r\n\r\n  colorPickerOneSelectedColor: string | null = null;\r\n  colorPickerOneComparedColor: string | null = null;\r\n\r\n  colorPickerTwoSelectedColor: string | null = null;\r\n  colorPickerTwoComparedColor: string | null = null;\r\n\r\n  contrastType: ContrastType | 'apca object' = 'apca';\r\n\r\n  resetSlider: ResetObject | null = null;\r\n\r\n  constantChroma: boolean = true;\r\n  showGradient: boolean = true;\r\n\r\n  currentAlertMessage: AlertMessagObj = new AlertMessagObj();\r\n\r\n  handleColorInputInput(inputNumber: 'One' | 'Two', event: string) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneSelectedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event;\r\n    }\r\n  }\r\n\r\n  handleSliderInputInput(inputNumber: 'One' | 'Two', event: string | null) {\r\n    if (inputNumber === 'One') {\r\n      this.colorPickerOneComparedColor = event;\r\n    }\r\n\r\n    if (inputNumber === 'Two') {\r\n      this.colorPickerTwoComparedColor = event;\r\n    }\r\n  }\r\n\r\n  handleCopyEvent(event: CopyToClipboardEvent) {\r\n    if (event.copied) {\r\n      this.alertUser({ message: `${event.color} copied to clipboard.` });\r\n    } else {\r\n      console.error(`color copy error.`);\r\n    }\r\n  }\r\n\r\n  handleColorPaletteButtonEvent(\r\n    paletteChartNum: 'One' | 'Two',\r\n    event: TableColorCell\r\n  ) {\r\n    if (paletteChartNum === 'One') {\r\n      this.colorPickerOneSelectedColor = event.color;\r\n    }\r\n\r\n    if (paletteChartNum === 'Two') {\r\n      this.colorPickerTwoSelectedColor = event.color;\r\n    }\r\n\r\n    this.alertUser({\r\n      message: `Color picker ${paletteChartNum} changed to ${event.color}`,\r\n    });\r\n  }\r\n\r\n  radioChange(changeTo: ContrastType | 'apca object') {\r\n    console.log(changeTo);\r\n    this.contrastType = changeTo;\r\n  }\r\n\r\n  toggleConstantChroma(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.constantChroma = checked ? true : false;\r\n\r\n    this.resetSliders();\r\n  }\r\n\r\n  toggleShowGradient(event: Event) {\r\n    const inputElement = event.target as HTMLInputElement;\r\n    const checked = inputElement.checked;\r\n\r\n    this.showGradient = checked ? true : false;\r\n  }\r\n\r\n  swapColors() {\r\n    const getColor = (type: 'fg' | 'bg'): string | null => {\r\n      let color: string | null = null;\r\n\r\n      switch (type) {\r\n        case 'fg':\r\n          color = this.colorPickerOneSelectedColor;\r\n\r\n          break;\r\n        case 'bg':\r\n          color = this.colorPickerTwoSelectedColor;\r\n\r\n          break;\r\n\r\n        default:\r\n          break;\r\n      }\r\n\r\n      return color;\r\n    };\r\n\r\n    const oldPairing = {\r\n      foreground: getColor('fg'),\r\n      background: getColor('bg'),\r\n    };\r\n\r\n    const newPairing = {\r\n      foreground: oldPairing.background,\r\n      background: oldPairing.foreground,\r\n    };\r\n\r\n    if (newPairing.foreground && newPairing.background) {\r\n      this.colorPickerOneSelectedColor = newPairing.foreground;\r\n\r\n      this.colorPickerTwoSelectedColor = newPairing.background;\r\n\r\n      this.alertUser({ message: 'Swapped foreground and background colors.' });\r\n    } else {\r\n      console.error('swapping colors went badly. . .');\r\n    }\r\n  }\r\n\r\n  async setRandomColorPair(initialAppColors?: boolean) {\r\n    const initColorPair = await this.cus.getRandomColorPair();\r\n\r\n    const randomColorPair = await this.cus.adjustColorPairForPresentation(\r\n      initColorPair\r\n    );\r\n\r\n    setTimeout(() => {\r\n      this.colorPickerOneSelectedColor = randomColorPair[0];\r\n      this.colorPickerTwoSelectedColor = randomColorPair[1];\r\n\r\n      if (!initialAppColors) {\r\n        this.alertUser({\r\n          message: `Random color pair generated: ${randomColorPair[0]}, and ${randomColorPair[1]}`,\r\n        });\r\n      }\r\n    }, 0);\r\n  }\r\n\r\n  resetSliders() {\r\n    this.resetSlider = { reset: true };\r\n\r\n    this.alertUser({ message: 'Resetted color sliders to initial states.' });\r\n  }\r\n\r\n  async matchChromas() {\r\n    if (this.colorPickerOneSelectedColor && this.colorPickerTwoSelectedColor) {\r\n      const matchedColors = await this.cus.matchChromas([\r\n        this.colorPickerOneSelectedColor,\r\n        this.colorPickerTwoSelectedColor,\r\n      ]);\r\n\r\n      if (\r\n        matchedColors.success &&\r\n        matchedColors.colors &&\r\n        matchedColors.chroma\r\n      ) {\r\n        this.colorPickerOneSelectedColor = matchedColors.colors[0];\r\n        this.colorPickerTwoSelectedColor = matchedColors.colors[1];\r\n\r\n        this.alertUser({\r\n          message: `Chroma matched foreground and background colors.`,\r\n        });\r\n      } else {\r\n        this.alertUser({ message: 'Unable to match  chroma across colors.' });\r\n      }\r\n    }\r\n  }\r\n\r\n  alertUser(message: AlertMessagObj) {\r\n    this.currentAlertMessage = message;\r\n  }\r\n\r\n  ngOnInit(): void {}\r\n\r\n  ngAfterViewInit(): void {\r\n    this.setRandomColorPair(true);\r\n  }\r\n}\r\n",
             "styleUrl": "./app.component.scss",
             "assetsDirs": [],
             "styleUrlsData": "",
@@ -5136,13 +5106,13 @@
                 "linktype": "component",
                 "name": "AlertComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/10",
+                "coverageCount": "0/9",
                 "status": "low"
             },
             {
                 "filePath": "src/app/alert/alert.component.ts",
-                "type": "interface",
-                "linktype": "interface",
+                "type": "class",
+                "linktype": "classe",
                 "name": "AlertMessagObj",
                 "coveragePercent": 0,
                 "coverageCount": "0/2",
